@@ -31,6 +31,9 @@ public class Equipo implements Serializable {
 	/** La Descripcion. */
 	private String Descripcion;
 
+	/** La Fecha de Creacion del Equipo. */
+	private Fecha FechaCreacion;
+
 	/** El Entrenador. */
 	private Entrenador Entrenador;
 
@@ -48,6 +51,7 @@ public class Equipo implements Serializable {
 		this.Nombre = "";
 		this.Escudo = "";
 		this.Descripcion = "";
+		this.FechaCreacion = new Fecha();
 		this.Entrenador = new Entrenador();
 		this.ListaJugadores = new ArrayList<Jugador>();
 		this.estadisticasPorTemporada = new ArrayList<Estadisticas>();
@@ -63,6 +67,7 @@ public class Equipo implements Serializable {
 		this.Nombre = e.Nombre;
 		this.Escudo = e.Escudo;
 		this.Descripcion = e.Descripcion;
+		this.FechaCreacion = e.FechaCreacion;
 		this.Entrenador = e.Entrenador;
 		this.ListaJugadores = e.ListaJugadores;
 		this.estadisticasPorTemporada = e.estadisticasPorTemporada;
@@ -79,10 +84,11 @@ public class Equipo implements Serializable {
 	 * @param es  la Lista de Estadisticas por Temporada
 	 */
 	// Constructor personalizado
-	public Equipo(String n, String esc, String d, Entrenador e, List<Jugador> lj, List<Estadisticas> es) {
+	public Equipo(String n, String esc, String d, Fecha f, Entrenador e, List<Jugador> lj, List<Estadisticas> es) {
 		this.Nombre = n;
 		this.Escudo = esc;
 		this.Descripcion = d;
+		this.FechaCreacion = f;
 		this.Entrenador = e;
 		this.ListaJugadores = lj;
 		this.estadisticasPorTemporada = es;
@@ -98,10 +104,11 @@ public class Equipo implements Serializable {
 	 * @param lj  la Lista de Jugadores
 	 */
 	// Constructor personalizado
-	public Equipo(String n, String esc, String d, Entrenador e, List<Jugador> lj) {
+	public Equipo(String n, String esc, String d, Fecha f, Entrenador e, List<Jugador> lj) {
 		this.Nombre = n;
 		this.Escudo = esc;
 		this.Descripcion = d;
+		this.FechaCreacion = f;
 		this.Entrenador = e;
 		this.ListaJugadores = lj;
 		this.estadisticasPorTemporada = new ArrayList<Estadisticas>();
@@ -117,6 +124,7 @@ public class Equipo implements Serializable {
 		this.Nombre = n;
 		this.Escudo = "";
 		this.Descripcion = "";
+		this.FechaCreacion = new Fecha();
 		this.Entrenador = new Entrenador();
 		this.ListaJugadores = new ArrayList<Jugador>();
 		this.estadisticasPorTemporada = new ArrayList<Estadisticas>();
@@ -228,6 +236,24 @@ public class Equipo implements Serializable {
 	 */
 	public void setEstadisticasPorTemporada(List<Estadisticas> estadisticasPorTemporada) {
 		this.estadisticasPorTemporada = estadisticasPorTemporada;
+	}
+
+	/**
+	 * Obtener la Fecha de Creacion.
+	 *
+	 * @return la Fecha de Creacion
+	 */
+	public Fecha getFechaCreacion() {
+		return FechaCreacion;
+	}
+
+	/**
+	 * Asignar la Fecha de Creacion.
+	 *
+	 * @param fechaCreacion la fecha de Creacion
+	 */
+	public void setFechaCreacion(Fecha fechaCreacion) {
+		FechaCreacion = fechaCreacion;
 	}
 
 	/**
@@ -350,7 +376,8 @@ public class Equipo implements Serializable {
 				}
 
 				// Actualizar las Rondas de Diferencia
-				estadisticasActuales.setRondasDiferencia(estadisticasActuales.getRondasDiferencia() + (partido.getPuntosLocal() - partido.getPuntosVisitante()));
+				estadisticasActuales.setRondasDiferencia(estadisticasActuales.getRondasDiferencia()
+						+ (partido.getPuntosLocal() - partido.getPuntosVisitante()));
 			} else if (nombreEquipo.equals(partido.getEquipoVisitante().getNombre())) {
 				// El equipo visitante está involucrado en el partido
 				if (Partido.determinarGanador(partido).equals("Visitante")) {
@@ -364,7 +391,8 @@ public class Equipo implements Serializable {
 				}
 
 				// Actualizar las Rondas de Diferencia
-				estadisticasActuales.setRondasDiferencia(estadisticasActuales.getRondasDiferencia() + (partido.getPuntosVisitante() - partido.getPuntosLocal()));
+				estadisticasActuales.setRondasDiferencia(estadisticasActuales.getRondasDiferencia()
+						+ (partido.getPuntosVisitante() - partido.getPuntosLocal()));
 			}
 		}
 	}

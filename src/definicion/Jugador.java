@@ -26,6 +26,9 @@ public class Jugador extends Participante {
 	
 	/** La Posicion de Juego. */
 	private String Rol;
+	
+	/** La Fecha de Nacimiento. */
+	private Fecha FechaNacimiento;
 
 	/**
 	 * Instancia para crear un nuevo Jugador por defecto.
@@ -35,6 +38,7 @@ public class Jugador extends Participante {
 		super();
 		this.Foto = "";
 		this.Rol = "";
+		this.FechaNacimiento = new Fecha();
 	}
 
 	/**
@@ -47,6 +51,7 @@ public class Jugador extends Participante {
 		super(j);
 		this.Foto = j.Foto;
 		this.Rol = j.Rol;
+		this.FechaNacimiento = j.FechaNacimiento;
 	}
 
 	/**
@@ -57,10 +62,11 @@ public class Jugador extends Participante {
 	 * @param rol el Rol
 	 */
 	// Contructor personalizado
-	public Jugador(Participante p, String foto , String rol) {
+	public Jugador(Participante p, String foto , String rol, Fecha fn) {
 		super(p);
 		this.Foto = foto;
 		this.Rol = rol;
+		this.FechaNacimiento = fn;
 	}
 
 	/**
@@ -69,7 +75,7 @@ public class Jugador extends Participante {
 	 * @return Informacion en formato String
 	 */
 	public String toString() {
-		return (super.toString() + " | " + Rol);
+		return (super.toString() + " | " + Rol + " | " + FechaNacimiento);
 	}
 
 	/**
@@ -106,6 +112,24 @@ public class Jugador extends Participante {
 	 */
 	public void setFoto(String foto) {
 		Foto = foto;
+	}
+	
+	/**
+	 * Obtener la Fecha de Nacimiento.
+	 *
+	 * @return la Fecha de Nacimiento
+	 */
+	public Fecha getFechaNacimiento() {
+		return FechaNacimiento;
+	}
+
+	/**
+	 * Asignar la Fecha de Nacimiento.
+	 *
+	 * @param fechaNacimiento la Fecha de Nacimiento
+	 */
+	public void setFechaNacimiento(Fecha fechaNacimiento) {
+		FechaNacimiento = fechaNacimiento;
 	}
 
 	/**
