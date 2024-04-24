@@ -618,7 +618,7 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 			return;
 		}
 
-		if (elm.getSize() < 6) {
+		if (elm.getSize() < 1) {
 			resaltarCampo(lstEquipos);
 			mostrarError("El número mínimo de equipos permitidos es de 6");
 			return;
@@ -786,12 +786,11 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 				String nombreFoto = equipo.getNombre() + "-" + jugador.getDNI() + extensionFoto;
 				String nuevaRutaFoto = "ficheros/Jugadores/Temporada" + temporada.getNumero() + "/" + nombreFoto;
 				Jugador nuevoJugador = new Jugador(new Participante(jugador.getDNI(), jugador.getNombre(),
-						jugador.getApellido(), jugador.getNacionalidad()), nuevaRutaFoto, jugador.getPosicion());
+						jugador.getApellido(), jugador.getNacionalidad()), nuevaRutaFoto, jugador.getPosicion(), jugador.getFechaNacimiento());
 				nuevosJugadores.add(nuevoJugador);
 			}
 
-			Equipo nuevoEquipo = new Equipo(equipo.getNombre(), nuevaRutaEscudo, equipo.getDescripcion(),
-					equipo.getEntrenador(), nuevosJugadores, equipo.getEstadisticasPorTemporada());
+			Equipo nuevoEquipo = new Equipo(equipo.getNombre(), nuevaRutaEscudo, equipo.getDescripcion(),equipo.getFechaCreacion(), equipo.getEntrenador(), nuevosJugadores, equipo.getEstadisticasPorTemporada());
 
 			nuevaListaEquipos.add(nuevoEquipo);
 		}

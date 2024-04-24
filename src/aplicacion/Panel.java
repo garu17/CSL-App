@@ -511,7 +511,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 		if (indiceSeleccionado != -1) {
 
 			JOptionPane.showMessageDialog(this,
-					"Los cambios realizados en el equipo no se aplicaran en las temporadas que se encuentre el equipo",
+					"Los cambios realizados en el equipo no se aplicaran en las temporadas que se encuentre el equipo, excepto las fechas",
 					"Aviso Edicion", JOptionPane.INFORMATION_MESSAGE);
 
 			// Creo las variables

@@ -830,6 +830,11 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 					writer.println("				<Escudo>Escudos/Temporada" + temporada.getNumero() + "/" + equipo.getNombre()
 							+ obtenerExtension(equipo.getEscudo()) + "</Escudo>");
 					writer.println("				<Descripcion>" + equipo.getDescripcion() + "</Descripcion>");
+					writer.println("				<FechaCreacion>");
+					writer.println("					<Dia>" + equipo.getFechaCreacion().getDia() + "</Dia>");
+					writer.println("					<Mes>" + equipo.getFechaCreacion().getMes() + "</Mes>");
+					writer.println("					<Año>" + equipo.getFechaCreacion().getAño() + "</Año>");
+					writer.println("				</FechaCreacion>");
 					writer.println("				<Entrenador>");
 					writer.println("					<DNI>" + equipo.getEntrenador().getDNI() + "</DNI>");
 					writer.println("					<Nombre>" + equipo.getEntrenador().getNombre() + "</Nombre>");
@@ -869,6 +874,11 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 								"						<Foto>Jugadores/Temporada" + temporada.getNumero() + "/" + equipo.getNombre()
 										+ "-" + jugador.getDNI() + obtenerExtension(jugador.getFoto()) + "</Foto>");
 						writer.println("						<Rol>" + jugador.getPosicion() + "</Rol>");
+						writer.println("						<FechaNacimiento>");
+						writer.println("							<Dia>" + jugador.getFechaNacimiento().getDia() + "</Dia>");
+						writer.println("							<Mes>" + jugador.getFechaNacimiento().getMes() + "</Mes>");
+						writer.println("							<Año>" + jugador.getFechaNacimiento().getAño() + "</Año>");
+						writer.println("						</FechaNacimiento>");
 
 						writer.println("					</Jugador>");
 					}

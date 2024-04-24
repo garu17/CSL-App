@@ -43,6 +43,7 @@ import definicion.Fecha;
 import definicion.Jugador;
 import definicion.Logger;
 import definicion.Participante;
+import definicion.Temporada;
 
 import javax.swing.JTextField;
 import javax.swing.ListCellRenderer;
@@ -97,6 +98,12 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 	/** El Label que Muestra la Foto del Jugador. */
 	private JLabel lblFotoJugador;
+	
+	/** El Panel de la Fecha de Creación. */
+	private JPanel panelCreacion;
+	
+	/** El Label que Muestra la Fecha de Creación. */
+	private JLabel lblFecha;
 
 	/** El Boton para Subir la Foto del Jugador. */
 	private JButton btnListaJugadoresSubir;
@@ -112,6 +119,21 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 	/** El Label de la Nacionalidad de los Jugadores de la Lista. */
 	private JLabel lblListajugadoresNacionalidad;
+	
+	/** El Label de la Primera Barra de la Fecha de Creación */
+	private JLabel lblCreacionBarra1;
+
+	/** El Label de la Segunda Barra de la Fecha de Creación */
+	private JLabel lblCreacionBarra2;
+	
+	/** El Label del Año de la Fecha de Creación. */
+	private JLabel lblCreacionAño;
+
+	/** El Label del Mes de la Fecha de Creación. */
+	private JLabel lblCreacionMes;
+
+	/** El Label del Dia de la Fecha de Creación. */
+	private JLabel lblCreacionDia;
 
 	/** La ComboBox de la Nacionalidad de los Jugadores de la Lista. */
 	private JComboBox<String> comboBoxListaJugadoresNacionalidad;
@@ -157,6 +179,15 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 	/** La ComboBox del Mes de Alta del Entrenador. */
 	private JComboBox<Integer> comboBoxEntrenadorMes;
+	
+	/** La ComboBox del Dia de Creacion del Equipo. */
+	private JComboBox<Integer> comboBoxCreacionDia;
+
+	/** La ComboBox del Año de Creacion del Equipo. */
+	private JComboBox<Integer> comboBoxCreacionAño;
+
+	/** La ComboBox del Mes de Creacion del Equipo. */
+	private JComboBox<Integer> comboBoxCreacionMes;
 
 	/** El Label de la Primera Barra de la Fecha de Alta del Entrenador. */
 	private JLabel lblListajugadoresBarra1;
@@ -223,6 +254,9 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 	/** La Lista de Movimientos Totales que hay Registrados. */
 	private ArrayList<Logger> ListaMovimientos;
+	
+	/** La Lista de Movimientos Totales que hay Registrados. */
+	private ArrayList<Temporada> ListaTemporadas;
 
 	/** Los Datos del Equipo Original. */
 	private Equipo DatosEquipo;
@@ -301,6 +335,24 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 	/** El Año de la Fecha de Alta del Entrenador. */
 	Integer AñoEntrenador = 0;
+	
+	/** El Dia de la Fecha de Alta del Entrenador. */
+	Integer DiaCreacion = 1;
+
+	/** El Mes de la Fecha de Alta del Entrenador. */
+	Integer MesCreacion = 1;
+
+	/** El Año de la Fecha de Alta del Entrenador. */
+	Integer AñoCreacion = 2024;
+	
+	/** El Dia de la Fecha de Alta del Entrenador. */
+	Integer DiaNacimiento = 1;
+
+	/** El Mes de la Fecha de Alta del Entrenador. */
+	Integer MesNacimiento = 1;
+
+	/** El Año de la Fecha de Alta del Entrenador. */
+	Integer AñoNacimiento = 2024;
 
 	/** La Nacionalidad de el Entrenador por defecto. */
 	String NacionalidadEntrenador = "...";
@@ -313,6 +365,16 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 	/** La Lista de las Fotos de los Jugadores que hay que eliminar. */
 	ArrayList<String> FotoJugadoresEliminados = new ArrayList<String>();
+	
+	private JLabel lblEntrenadorAño_1;
+	private JLabel lblEntrenadorMes_1;
+	private JLabel lblEntrenadorDia_1;
+	private JComboBox<Integer> comboBoxJugadorDia;
+	private JLabel lblNacimientoBarra1;
+	private JComboBox<Integer> comboBoxJugadorMes;
+	private JLabel lblNacimientoBarra2;
+	private JComboBox<Integer> comboBoxJugadorAño;
+	private JLabel lblFechaNacimiento;
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -342,7 +404,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		setResizable(false);
 		setTitle("Editar Equipo");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 550, 650);
+		setBounds(100, 100, 550, 750);
 		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(null);
@@ -356,7 +418,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		btnVolver.setBackground(new Color(74, 127, 214));
 		btnVolver.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnVolver.setFocusable(false);
-		btnVolver.setBounds(329, 556, 85, 40);
+		btnVolver.setBounds(329, 663, 85, 40);
 		contentPane.add(btnVolver);
 
 		lblNombreEquipo = new JLabel("Cambiar Nombre del Equipo:");
@@ -389,42 +451,44 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		panelListaJugadores.setLayout(null);
 
 		textListaJugadoresNombre = new JTextField();
-		textListaJugadoresNombre.setBounds(114, 27, 106, 19);
+		textListaJugadoresNombre.setBounds(82, 27, 65, 19);
 		panelListaJugadores.add(textListaJugadoresNombre);
 		textListaJugadoresNombre.setColumns(10);
 
 		btnListaJugadoresAñadir = new JButton("Añadir");
 		btnListaJugadoresAñadir.setFocusable(false);
+		btnListaJugadoresAñadir.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnListaJugadoresAñadir.addActionListener(this);
-		btnListaJugadoresAñadir.setBounds(341, 22, 112, 28);
 		btnListaJugadoresAñadir.setBackground(new Color(230, 230, 230));
+		btnListaJugadoresAñadir.setBounds(278, 56, 80, 28);
 		panelListaJugadores.add(btnListaJugadoresAñadir);
 
 		btnListaJugadoresEliminar = new JButton("Eliminar");
 		btnListaJugadoresEliminar.setFocusable(false);
+		btnListaJugadoresEliminar.setFont(new Font("Dialog", Font.BOLD, 12));
 		btnListaJugadoresEliminar.addActionListener(this);
-		btnListaJugadoresEliminar.setBounds(341, 56, 112, 28);
 		btnListaJugadoresEliminar.setBackground(new Color(230, 230, 230));
+		btnListaJugadoresEliminar.setBounds(368, 56, 85, 28);
 		panelListaJugadores.add(btnListaJugadoresEliminar);
 
 		textListaJugadoresApellido = new JTextField();
 		textListaJugadoresApellido.setColumns(10);
-		textListaJugadoresApellido.setBounds(225, 27, 106, 19);
+		textListaJugadoresApellido.setBounds(157, 27, 106, 19);
 		panelListaJugadores.add(textListaJugadoresApellido);
 
 		lblListajugadoresNombre = new JLabel("Nombre:");
 		lblListajugadoresNombre.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblListajugadoresNombre.setBounds(114, 10, 106, 13);
+		lblListajugadoresNombre.setBounds(82, 10, 65, 13);
 		panelListaJugadores.add(lblListajugadoresNombre);
 
 		lblListaJugadoresApellido = new JLabel("Apellido:");
 		lblListaJugadoresApellido.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblListaJugadoresApellido.setBounds(225, 10, 106, 13);
+		lblListaJugadoresApellido.setBounds(157, 10, 65, 13);
 		panelListaJugadores.add(lblListaJugadoresApellido);
 
 		lblListaJugadoresRol = new JLabel("Rol:");
 		lblListaJugadoresRol.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblListaJugadoresRol.setBounds(114, 48, 106, 13);
+		lblListaJugadoresRol.setBounds(82, 48, 65, 13);
 		panelListaJugadores.add(lblListaJugadoresRol);
 
 		lblListajugadoresNacionalidad = new JLabel("Nacionalidad:");
@@ -436,19 +500,19 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		comboBoxListaJugadoresPosicion.setBackground(Color.WHITE);
 		comboBoxListaJugadoresPosicion.setFocusable(false);
 		comboBoxListaJugadoresPosicion.addActionListener(this);
-		comboBoxListaJugadoresPosicion.setBounds(113, 65, 106, 19);
+		comboBoxListaJugadoresPosicion.setBounds(81, 65, 65, 19);
 		panelListaJugadores.add(comboBoxListaJugadoresPosicion);
 
 		comboBoxListaJugadoresNacionalidad = new JComboBox<>(nacionalidades);
 		comboBoxListaJugadoresNacionalidad.setBackground(Color.WHITE);
 		comboBoxListaJugadoresNacionalidad.setFocusable(false);
 		comboBoxListaJugadoresNacionalidad.addActionListener(this);
-		comboBoxListaJugadoresNacionalidad.setBounds(6, 65, 106, 19);
+		comboBoxListaJugadoresNacionalidad.setBounds(6, 65, 65, 19);
 		panelListaJugadores.add(comboBoxListaJugadoresNacionalidad);
 
 		textListaJugadoresDNI = new JTextField();
 		textListaJugadoresDNI.setColumns(10);
-		textListaJugadoresDNI.setBounds(6, 27, 106, 19);
+		textListaJugadoresDNI.setBounds(6, 27, 65, 19);
 		panelListaJugadores.add(textListaJugadoresDNI);
 
 		lblListajugadoresDNI = new JLabel("DNI/NIE:");
@@ -456,6 +520,127 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		lblListajugadoresDNI.setBounds(6, 10, 106, 13);
 		panelListaJugadores.add(lblListajugadoresDNI);
 
+		lblFotoJugador = new JLabel("");
+		lblFotoJugador.setBorder(new LineBorder(new Color(0, 0, 0)));
+		lblFotoJugador.setBounds(227, 48, 36, 36);
+		panelListaJugadores.add(lblFotoJugador);
+
+		btnListaJugadoresSubir = new JButton("Subir");
+		btnListaJugadoresSubir.addActionListener(this);
+		btnListaJugadoresSubir.setFont(new Font("Dialog", Font.BOLD, 12));
+		btnListaJugadoresSubir.setFocusable(false);
+		btnListaJugadoresSubir.setBackground(new Color(255, 255, 255));
+		btnListaJugadoresSubir.setBounds(157, 65, 69, 19);
+		panelListaJugadores.add(btnListaJugadoresSubir);
+
+		lblListaJugadoresSubir = new JLabel("Subir Foto:");
+		lblListaJugadoresSubir.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblListaJugadoresSubir.setBounds(157, 48, 69, 13);
+		panelListaJugadores.add(lblListaJugadoresSubir);
+		
+		lblEntrenadorAño_1 = new JLabel("Año");
+		lblEntrenadorAño_1.setForeground(Color.GRAY);
+		lblEntrenadorAño_1.setFont(new Font("Dialog", Font.BOLD, 10));
+		lblEntrenadorAño_1.setBounds(356, 45, 35, 13);
+		panelListaJugadores.add(lblEntrenadorAño_1);
+		
+		lblEntrenadorMes_1 = new JLabel("Mes");
+		lblEntrenadorMes_1.setForeground(Color.GRAY);
+		lblEntrenadorMes_1.setFont(new Font("Dialog", Font.BOLD, 10));
+		lblEntrenadorMes_1.setBounds(319, 45, 29, 13);
+		panelListaJugadores.add(lblEntrenadorMes_1);
+		
+		lblEntrenadorDia_1 = new JLabel("Dia");
+		lblEntrenadorDia_1.setForeground(Color.GRAY);
+		lblEntrenadorDia_1.setFont(new Font("Dialog", Font.BOLD, 10));
+		lblEntrenadorDia_1.setBounds(280, 45, 21, 13);
+		panelListaJugadores.add(lblEntrenadorDia_1);
+		
+		comboBoxJugadorDia = new JComboBox<Integer>(dia);
+		comboBoxJugadorDia.setBounds(279, 27, 35, 19);
+		comboBoxJugadorDia.addActionListener(this);
+		comboBoxJugadorDia.setUI(new BasicComboBoxUI() {
+			@Override
+			protected JButton createArrowButton() {
+				return new JButton() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public int getWidth() {
+						return 0; // Establece el ancho del botón de flecha a cero
+					}
+
+					@Override
+					public boolean isVisible() {
+						return false; // Hace que el botón de flecha no sea visible
+					}
+				};
+			}
+		});
+		panelListaJugadores.add(comboBoxJugadorDia);
+		
+		lblNacimientoBarra1 = new JLabel("/");
+		lblNacimientoBarra1.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblNacimientoBarra1.setBounds(316, 27, 12, 19);
+		panelListaJugadores.add(lblNacimientoBarra1);
+		
+		comboBoxJugadorMes = new JComboBox<Integer>(mes);
+		comboBoxJugadorMes.setMaximumRowCount(12);
+		comboBoxJugadorMes.setBounds(324, 27, 21, 19);
+		comboBoxJugadorMes.addActionListener(this);
+		comboBoxJugadorMes.setUI(new BasicComboBoxUI() {
+			@Override
+			protected JButton createArrowButton() {
+				return new JButton() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public int getWidth() {
+						return 0; // Establece el ancho del botón de flecha a cero
+					}
+
+					@Override
+					public boolean isVisible() {
+						return false; // Hace que el botón de flecha no sea visible
+					}
+				};
+			}
+		});
+		panelListaJugadores.add(comboBoxJugadorMes);
+				
+		lblNacimientoBarra2 = new JLabel("/");
+		lblNacimientoBarra2.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblNacimientoBarra2.setBounds(347, 27, 12, 19);
+		panelListaJugadores.add(lblNacimientoBarra2);
+		
+		inicializarAño();
+		comboBoxJugadorAño = new JComboBox<Integer>(año);
+		comboBoxJugadorAño.setBounds(353, 27, 61, 19);
+		comboBoxJugadorAño.addActionListener(this);
+		comboBoxJugadorAño.setUI(new BasicComboBoxUI() {
+			@Override
+			protected JButton createArrowButton() {
+				return new JButton() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public int getWidth() {
+						return 0; // Establece el ancho del botón de flecha a cero
+					}
+
+					@Override
+					public boolean isVisible() {
+						return false; // Hace que el botón de flecha no sea visible
+					}
+				};
+			}
+		});
+		panelListaJugadores.add(comboBoxJugadorAño);
+		
+		lblFechaNacimiento = new JLabel("Fecha de Nacimiento:");
+		lblFechaNacimiento.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblFechaNacimiento.setBounds(278, 10, 136, 13);
+		panelListaJugadores.add(lblFechaNacimiento);
 		lblEditarEscudo = new JLabel("Editar Escudo:");
 		lblEditarEscudo.setFont(new Font("Dialog", Font.BOLD, 18));
 		lblEditarEscudo.setBounds(36, 81, 200, 33);
@@ -636,7 +821,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		btnGuardar.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnGuardar.setFocusable(false);
 		btnGuardar.setBackground(new Color(74, 127, 214));
-		btnGuardar.setBounds(122, 556, 85, 40);
+		btnGuardar.setBounds(122, 663, 85, 40);
 		contentPane.add(btnGuardar);
 
 		lblDescripcion = new JLabel("Cambiar Descripción:");
@@ -647,14 +832,14 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		// Reemplaza la declaración de JTextArea existente con la siguiente
 		textDescripcion = new JTextArea();
 		textDescripcion.setFont(new Font("Dialog", Font.PLAIN, 13));
-		textDescripcion.setBounds(42, 484, 351, 50);
+		textDescripcion.setBounds(42, 484, 351, 75);
 		textDescripcion.setLineWrap(true);
 		textDescripcion.setWrapStyleWord(true);
 
 		// Crea un JScrollPane y envuelve el JTextArea con él
 		scrollPane = new JScrollPane(textDescripcion);
 		scrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
-		scrollPane.setBounds(36, 484, 464, 50);
+		scrollPane.setBounds(36, 484, 464, 75);
 		// Añade el JScrollPane al contenido en lugar del JTextArea directamente
 		contentPane.add(scrollPane);
 
@@ -670,24 +855,111 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		lblEscudo.setBorder(new LineBorder(new Color(0, 0, 0)));
 		lblEscudo.setBounds(433, 98, 65, 59);
 		contentPane.add(lblEscudo);
+		
+		lblFecha = new JLabel("Fecha de Creación:");
+		lblFecha.setFont(new Font("Dialog", Font.BOLD, 18));
+		lblFecha.setBounds(36, 560, 200, 33);
+		contentPane.add(lblFecha);
 
-		lblFotoJugador = new JLabel("");
-		lblFotoJugador.setBorder(new LineBorder(new Color(0, 0, 0)));
-		lblFotoJugador.setBounds(295, 48, 36, 36);
-		panelListaJugadores.add(lblFotoJugador);
+		panelCreacion = new JPanel();
+		panelCreacion.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panelCreacion.setBackground(Color.WHITE);
+		panelCreacion.setBounds(36, 592, 463, 51);
+		contentPane.add(panelCreacion);
+		panelCreacion.setLayout(null);
 
-		btnListaJugadoresSubir = new JButton("Subir");
-		btnListaJugadoresSubir.addActionListener(this);
-		btnListaJugadoresSubir.setFont(new Font("Dialog", Font.BOLD, 12));
-		btnListaJugadoresSubir.setFocusable(false);
-		btnListaJugadoresSubir.setBackground(new Color(255, 255, 255));
-		btnListaJugadoresSubir.setBounds(225, 65, 69, 19);
-		panelListaJugadores.add(btnListaJugadoresSubir);
+		comboBoxCreacionAño = new JComboBox<Integer>(año);
+		comboBoxCreacionAño.setBounds(113, 10, 52, 19);
+		panelCreacion.add(comboBoxCreacionAño);
+		comboBoxCreacionAño.addActionListener(this);
+		comboBoxCreacionAño.setUI(new BasicComboBoxUI() {
+			@Override
+			protected JButton createArrowButton() {
+				return new JButton() {
+					private static final long serialVersionUID = 1L;
 
-		lblListaJugadoresSubir = new JLabel("Subir Foto:");
-		lblListaJugadoresSubir.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblListaJugadoresSubir.setBounds(225, 48, 69, 13);
-		panelListaJugadores.add(lblListaJugadoresSubir);
+					@Override
+					public int getWidth() {
+						return 0; // Establece el ancho del botón de flecha a cero
+					}
+
+					@Override
+					public boolean isVisible() {
+						return false; // Hace que el botón de flecha no sea visible
+					}
+				};
+			}
+		});
+
+		lblCreacionAño = new JLabel("Año");
+		lblCreacionAño.setBounds(113, 28, 35, 13);
+		panelCreacion.add(lblCreacionAño);
+		lblCreacionAño.setForeground(Color.GRAY);
+		lblCreacionAño.setFont(new Font("Dialog", Font.BOLD, 10));
+
+		lblCreacionBarra2 = new JLabel("/");
+		lblCreacionBarra2.setBounds(102, 10, 12, 19);
+		panelCreacion.add(lblCreacionBarra2);
+		lblCreacionBarra2.setFont(new Font("Tahoma", Font.BOLD, 10));
+
+		comboBoxCreacionMes = new JComboBox<Integer>(mes);
+		comboBoxCreacionMes.setBounds(62, 10, 35, 19);
+		panelCreacion.add(comboBoxCreacionMes);
+		comboBoxCreacionMes.addActionListener(this);
+		comboBoxCreacionMes.setMaximumRowCount(12);
+		comboBoxCreacionMes.setUI(new BasicComboBoxUI() {
+			@Override
+			protected JButton createArrowButton() {
+				return new JButton() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public int getWidth() {
+						return 0; // Establece el ancho del botón de flecha a cero
+					}
+
+					@Override
+					public boolean isVisible() {
+						return false; // Hace que el botón de flecha no sea visible
+					}
+				};
+			}
+		});
+
+		lblCreacionBarra1 = new JLabel("/");
+		lblCreacionBarra1.setBounds(48, 10, 12, 19);
+		panelCreacion.add(lblCreacionBarra1);
+		lblCreacionBarra1.setFont(new Font("Tahoma", Font.BOLD, 10));
+
+		comboBoxCreacionDia = new JComboBox<Integer>(dia);
+		comboBoxCreacionDia.setBounds(10, 10, 35, 19);
+		panelCreacion.add(comboBoxCreacionDia);
+		comboBoxCreacionDia.addActionListener(this);
+		comboBoxCreacionDia.setUI(new BasicComboBoxUI() {
+			@Override
+			protected JButton createArrowButton() {
+				return new JButton() {
+					private static final long serialVersionUID = 1L;
+
+					@Override
+					public int getWidth() {
+						return 0; // Oculta la flecha hacia abajo de la comboBox
+					}
+				};
+			}
+		});
+
+		lblCreacionMes = new JLabel("Mes");
+		lblCreacionMes.setBounds(62, 28, 29, 13);
+		panelCreacion.add(lblCreacionMes);
+		lblCreacionMes.setForeground(Color.GRAY);
+		lblCreacionMes.setFont(new Font("Dialog", Font.BOLD, 10));
+
+		lblCreacionDia = new JLabel("Dia");
+		lblCreacionDia.setBounds(10, 28, 21, 13);
+		panelCreacion.add(lblCreacionDia);
+		lblCreacionDia.setForeground(Color.GRAY);
+		lblCreacionDia.setFont(new Font("Dialog", Font.BOLD, 10));
 
 		ListaJugadores = Jugador.cargarJugadores();
 		ListaEntrenadores = Entrenador.cargarEntrenadores();
@@ -695,6 +967,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 		ListaJugadoresRegistrados = EquipoModificado.getListaJugadores();
 		ListaMovimientos = Logger.cargarMovimientos();
+		ListaTemporadas = Temporada.cargarTemporadas();
 
 		DatosEquipo = EquipoSeleccion.getEquipoSeleccionado();
 		DatosJugadores = new ArrayList<Jugador>();
@@ -728,10 +1001,26 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 			DiaEntrenador = (Integer) comboBoxEntrenadorDia.getSelectedItem();
 		} else if (e.getSource() == comboBoxEntrenadorMes) {
 			MesEntrenador = (Integer) comboBoxEntrenadorMes.getSelectedItem();
-			Fecha();
+			Fecha(1);
 		} else if (e.getSource() == comboBoxEntrenadorAño) {
 			AñoEntrenador = (Integer) comboBoxEntrenadorAño.getSelectedItem();
-			Fecha();
+			Fecha(1);
+		} else if (e.getSource() == comboBoxCreacionDia) {
+			DiaCreacion = (Integer) comboBoxCreacionDia.getSelectedItem();
+		} else if (e.getSource() == comboBoxCreacionMes) {
+			MesCreacion = (Integer) comboBoxCreacionMes.getSelectedItem();
+			Fecha(2);
+		} else if (e.getSource() == comboBoxCreacionAño) {
+			AñoCreacion = (Integer) comboBoxCreacionAño.getSelectedItem();
+			Fecha(2);
+		}  else if (e.getSource() == comboBoxJugadorDia) {
+			DiaNacimiento = (Integer) comboBoxJugadorDia.getSelectedItem();
+		} else if (e.getSource() == comboBoxJugadorMes) {
+			MesNacimiento = (Integer) comboBoxJugadorMes.getSelectedItem();
+			Fecha(3);
+		} else if (e.getSource() == comboBoxJugadorAño) {
+			AñoNacimiento = (Integer) comboBoxJugadorAño.getSelectedItem();
+			Fecha(3);
 		} else if (e.getSource() == comboBoxEntrenadorNacionalidad) {
 			NacionalidadEntrenador = (String) comboBoxEntrenadorNacionalidad.getSelectedItem();
 		} else if (e.getSource() == comboBoxListaJugadoresNacionalidad) {
@@ -822,15 +1111,32 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 	/**
 	 * Funcion para seleccionar la Fecha.
 	 */
-	private void Fecha() {
-		int selectedMonth = (Integer) comboBoxEntrenadorMes.getSelectedItem();
+	private void Fecha(Integer eleccion) {
+		int selectedMonth;
 
+		
+		if (eleccion == 1) {
+			selectedMonth = (Integer) comboBoxEntrenadorMes.getSelectedItem();
+		} else if (eleccion == 2) {
+			selectedMonth = (Integer) comboBoxCreacionMes.getSelectedItem();
+		} else {
+			selectedMonth = (Integer) comboBoxJugadorMes.getSelectedItem();
+		}
+		
 		// Crear un nuevo array con la longitud adecuada según el mes seleccionado
 		Integer[] newArray;
 
 		if (selectedMonth == 2) {
 			// Febrero, verificar si el año es bisiesto
-			int selectedYear = (Integer) comboBoxEntrenadorAño.getSelectedItem();
+			int selectedYear;
+			if (eleccion == 1) {
+				selectedYear = (Integer) comboBoxEntrenadorAño.getSelectedItem();
+			} else if (eleccion == 2) {
+				selectedYear = (Integer) comboBoxCreacionAño.getSelectedItem();
+			} else {
+				selectedYear = (Integer) comboBoxJugadorAño.getSelectedItem();
+			}
+			
 			// Si es Bisiesto
 			int daysInFebruary = (selectedYear % 4 == 0 && (selectedYear % 100 != 0 || selectedYear % 400 == 0)) ? 29 : 28;
 			newArray = new Integer[daysInFebruary];
@@ -852,10 +1158,22 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 		// Actualizar el modelo del JComboBox con el nuevo array
 		DefaultComboBoxModel<Integer> model = new DefaultComboBoxModel<>(dia);
-		comboBoxEntrenadorDia.setModel(model);
+		if (eleccion == 1) {
+			comboBoxEntrenadorDia.setModel(model);
 
-		// Actualizar el valor seleccionado en el JComboBox (poner el primer día)
-		comboBoxEntrenadorDia.setSelectedItem(dia[0]);
+			// Actualizar el valor seleccionado en el JComboBox (poner el primer día)
+			comboBoxEntrenadorDia.setSelectedItem(dia[0]);
+		} else if (eleccion == 2) {
+			comboBoxCreacionDia.setModel(model);
+
+			// Actualizar el valor seleccionado en el JComboBox (poner el primer día)
+			comboBoxCreacionDia.setSelectedItem(dia[0]);
+		} else {
+			comboBoxJugadorDia.setModel(model);
+
+			// Actualizar el valor seleccionado en el JComboBox (poner el primer día)
+			comboBoxJugadorDia.setSelectedItem(dia[0]);
+		}
 	}
 
 	/**
@@ -1051,6 +1369,23 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				System.err.println("El archivo no existe en la ruta: " + ruta);
 			}
 		}
+		
+		for (Temporada temporada : ListaTemporadas) {
+			for (Equipo equipo : temporada.getListaEquipos()) {
+				if (equipo.getNombre().equals(NombreEquipo)) {
+					equipo.getFechaCreacion().setDia(DiaCreacion);
+					equipo.getFechaCreacion().setMes(MesCreacion);
+					equipo.getFechaCreacion().setAño(AñoCreacion);
+					if (equipo.getEntrenador().getDNI().equals(DNIEntrenador)) {
+						equipo.getEntrenador().getFechaAlta().setDia(DiaEntrenador);
+						equipo.getEntrenador().getFechaAlta().setMes(MesEntrenador);
+						equipo.getEntrenador().getFechaAlta().setAño(AñoEntrenador);
+					}
+				}
+			}
+		}
+		
+		Temporada.guardarTemporadas(ListaTemporadas);
 
 		// Creas los nuevos datos ingresados
 		Participante nuevoParticipante = new Participante(DNIEntrenador, NombreEntrenador, ApellidoEntrenador,
@@ -1079,6 +1414,9 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		EquipoModificado.getEntrenador().getFechaAlta().setAño(AñoEntrenador);
 		EquipoModificado.setListaJugadores(ListaJugadoresRegistrados);
 		EquipoModificado.setDescripcion(Descripcion);
+		EquipoModificado.getFechaCreacion().setDia(DiaCreacion);
+		EquipoModificado.getFechaCreacion().setMes(MesCreacion);
+		EquipoModificado.getFechaCreacion().setAño(AñoCreacion);
 
 		// Agregas el nuevo usuario a la lista
 		ListaEquipos.add(EquipoModificado);
@@ -1159,6 +1497,21 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 			mostrarError("Por favor, seleccione la Foto del Jugador");
 			return;
 		}
+		
+		for (Temporada temporada : ListaTemporadas) {
+			for (Equipo equipo : temporada.getListaEquipos()) {
+				for (Jugador jugador : equipo.getListaJugadores()) {
+					if (jugador.getDNI().equals(DNIJugador)) {
+						jugador.getFechaNacimiento().setDia(DiaNacimiento);
+						jugador.getFechaNacimiento().setMes(MesNacimiento);
+						jugador.getFechaNacimiento().setAño(AñoNacimiento);
+					}
+				}
+			}
+		}
+		
+		Temporada.guardarTemporadas(ListaTemporadas);
+		
 		// Guardar la foto y el DNI del jugador en la variable que guarda todas las
 		// fotos y DNIs
 		escudosJugadores.append(FotoJugador).append(",").append(DNIJugador).append(";");
@@ -1166,7 +1519,10 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		// Crear un nuevo objeto Jugador con la información proporcionada
 		Participante nuevoParticipante = new Participante(DNIJugador, NombreJugador, ApellidoJugador,
 				NacionalidadJugador);
-		Jugador nuevoJugador = new Jugador(nuevoParticipante, FotoJugador, PosicionJugador);
+		// Crear un nuevo objeto Fecha con la información proporcionada
+		Fecha FechaN = new Fecha(DiaNacimiento, MesNacimiento, AñoNacimiento);
+		
+		Jugador nuevoJugador = new Jugador(nuevoParticipante, FotoJugador, PosicionJugador, FechaN);
 
 		// Agregas el nuevo usuario a la lista
 		ListaJugadoresRegistrados.add(nuevoJugador);
@@ -1368,6 +1724,9 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		comboBoxEntrenadorDia.setSelectedItem(EquipoModificado.getEntrenador().getFechaAlta().getDia());
 		comboBoxEntrenadorMes.setSelectedItem(EquipoModificado.getEntrenador().getFechaAlta().getMes());
 		comboBoxEntrenadorAño.setSelectedItem(EquipoModificado.getEntrenador().getFechaAlta().getAño());
+		comboBoxCreacionDia.setSelectedItem(EquipoModificado.getFechaCreacion().getDia());
+		comboBoxCreacionMes.setSelectedItem(EquipoModificado.getFechaCreacion().getMes());
+		comboBoxCreacionAño.setSelectedItem(EquipoModificado.getFechaCreacion().getAño());
 
 		// Añadir los jugadores
 		for (Jugador jugador : EquipoModificado.getListaJugadores()) {
@@ -1463,6 +1822,9 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 			textListaJugadoresApellido.setText(jlm.getElementAt(selectedIndex).getApellido());
 			comboBoxListaJugadoresNacionalidad.setSelectedItem(jlm.getElementAt(selectedIndex).getNacionalidad());
 			comboBoxListaJugadoresPosicion.setSelectedItem(jlm.getElementAt(selectedIndex).getPosicion());
+			comboBoxJugadorAño.setSelectedItem(jlm.getElementAt(selectedIndex).getFechaNacimiento().getAño());
+			comboBoxJugadorMes.setSelectedItem(jlm.getElementAt(selectedIndex).getFechaNacimiento().getMes());
+			comboBoxJugadorDia.setSelectedItem(jlm.getElementAt(selectedIndex).getFechaNacimiento().getDia());
 		}
 	}
 

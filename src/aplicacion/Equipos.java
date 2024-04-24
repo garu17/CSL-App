@@ -358,6 +358,15 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 				setEnabled(true);
 				// Establece que la ventana se quede en primer plano
 				requestFocus();
+				
+				// Creo las variables
+				Equipos T = new Equipos();
+				// Muestro la ventana Equipos
+				T.setVisible(true);
+				// Centrar la ventana en el centro de la pantalla
+				T.setLocationRelativeTo(null);
+				// Cierro la ventana Login
+				dispose();
 			}
 		});
 	}

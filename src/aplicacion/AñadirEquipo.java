@@ -1755,6 +1755,9 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			textListaJugadoresApellido.setText(jlm.getElementAt(selectedIndex).getApellido());
 			comboBoxListaJugadoresNacionalidad.setSelectedItem(jlm.getElementAt(selectedIndex).getNacionalidad());
 			comboBoxListaJugadoresPosicion.setSelectedItem(jlm.getElementAt(selectedIndex).getPosicion());
+			comboBoxJugadorAño.setSelectedItem(jlm.getElementAt(selectedIndex).getFechaNacimiento().getAño());
+			comboBoxJugadorMes.setSelectedItem(jlm.getElementAt(selectedIndex).getFechaNacimiento().getMes());
+			comboBoxJugadorDia.setSelectedItem(jlm.getElementAt(selectedIndex).getFechaNacimiento().getDia());
 		}
 	}
 

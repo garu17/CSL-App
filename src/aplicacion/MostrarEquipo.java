@@ -23,7 +23,6 @@ import javax.swing.JList;
 import javax.swing.border.LineBorder;
 
 import definicion.Equipo;
-import definicion.Fecha;
 import definicion.Jugador;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
@@ -138,6 +137,15 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 
 	/** El Label de la Segunda Barra de la Fecha de Alta del Entrenador. */
 	private JLabel lblEntrenadorDatosFechaBarra2;
+	private JLabel lblJugadoresFechaNac;
+	private JLabel lblFechaCreacion;
+	private JPanel panelCreacion;
+	private JLabel lblCreacionDia;
+	private JLabel lblCreacionMes;
+	private JLabel lblCreacionAño;
+	private JLabel lblCreacionBarra1;
+	private JLabel lblCreacionBarra2;
+	private JLabel lblJugadoresFoto;
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -166,7 +174,7 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 		setResizable(false);
 		setTitle("Informacion Equipo");
 		setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-		setBounds(100, 100, 550, 650);
+		setBounds(100, 100, 550, 750);
 		setLocationRelativeTo(null);
 		contentPane = new JPanel();
 		contentPane.setBorder(null);
@@ -180,7 +188,7 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 		btnVolver.setBackground(new Color(74, 127, 214));
 		btnVolver.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnVolver.setFocusable(false);
-		btnVolver.setBounds(225, 550, 85, 40);
+		btnVolver.setBounds(225, 648, 85, 40);
 		contentPane.add(btnVolver);
 
 		lblNombreEquipo = new JLabel("Nombre del Equipo");
@@ -289,33 +297,38 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 
 		lblJugadoresNombre = new JLabel("Nombre:");
 		lblJugadoresNombre.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblJugadoresNombre.setBounds(129, 10, 43, 13);
+		lblJugadoresNombre.setBounds(108, 10, 43, 13);
 		panelJugadores.add(lblJugadoresNombre);
 
 		lblJugadoresApellido = new JLabel("Apellido:");
 		lblJugadoresApellido.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblJugadoresApellido.setBounds(192, 10, 50, 13);
+		lblJugadoresApellido.setBounds(161, 10, 50, 13);
 		panelJugadores.add(lblJugadoresApellido);
 
 		lblJugadoresrNacionalidad = new JLabel("Nacionalidad:");
 		lblJugadoresrNacionalidad.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblJugadoresrNacionalidad.setBounds(259, 10, 68, 13);
+		lblJugadoresrNacionalidad.setBounds(221, 10, 68, 13);
 		panelJugadores.add(lblJugadoresrNacionalidad);
 
 		lblJugadoresRol = new JLabel("Rol:");
 		lblJugadoresRol.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblJugadoresRol.setBounds(346, 10, 50, 13);
+		lblJugadoresRol.setBounds(299, 10, 20, 13);
 		panelJugadores.add(lblJugadoresRol);
 
 		lblJugadoresDNI = new JLabel("DNI/NIE:");
 		lblJugadoresDNI.setFont(new Font("Tahoma", Font.BOLD, 10));
-		lblJugadoresDNI.setBounds(59, 10, 50, 13);
+		lblJugadoresDNI.setBounds(48, 10, 50, 13);
 		panelJugadores.add(lblJugadoresDNI);
 		
-		JLabel lblJugadoresFoto = new JLabel("Foto:");
+		lblJugadoresFoto = new JLabel("Foto:");
 		lblJugadoresFoto.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblJugadoresFoto.setBounds(10, 10, 28, 13);
 		panelJugadores.add(lblJugadoresFoto);
+		
+		lblJugadoresFechaNac = new JLabel("Fecha Nacimiento:");
+		lblJugadoresFechaNac.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblJugadoresFechaNac.setBounds(329, 10, 98, 13);
+		panelJugadores.add(lblJugadoresFechaNac);
 
 		lblEntrenadorDatosNombre = new JLabel((String) null);
 		lblEntrenadorDatosNombre.setFont(new Font("Tahoma", Font.BOLD, 10));
@@ -360,6 +373,47 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 		lblEntrenadorDatosFechaBarra2.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblEntrenadorDatosFechaBarra2.setBounds(377, 33, 14, 13);
 		panelEntrenador.add(lblEntrenadorDatosFechaBarra2);
+		
+		lblFechaCreacion = new JLabel("Fecha de Creación:");
+		lblFechaCreacion.setFont(new Font("Dialog", Font.BOLD, 18));
+		lblFechaCreacion.setBounds(42, 534, 234, 33);
+		contentPane.add(lblFechaCreacion);
+		
+		panelCreacion = new JPanel();
+		panelCreacion.setLayout(null);
+		panelCreacion.setBorder(new LineBorder(new Color(0, 0, 0)));
+		panelCreacion.setBackground(Color.WHITE);
+		panelCreacion.setBounds(42, 573, 437, 54);
+		contentPane.add(panelCreacion);
+		
+		lblCreacionDia = new JLabel((String) null);
+		lblCreacionDia.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCreacionDia.setBorder(null);
+		lblCreacionDia.setBounds(10, 20, 24, 13);
+		panelCreacion.add(lblCreacionDia);
+		
+		lblCreacionMes = new JLabel((String) null);
+		lblCreacionMes.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCreacionMes.setBorder(null);
+		lblCreacionMes.setBounds(48, 20, 24, 13);
+		panelCreacion.add(lblCreacionMes);
+		
+		lblCreacionAño = new JLabel((String) null);
+		lblCreacionAño.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCreacionAño.setBounds(84, 20, 38, 13);
+		panelCreacion.add(lblCreacionAño);
+		
+		lblCreacionBarra1 = new JLabel("/");
+		lblCreacionBarra1.setHorizontalAlignment(SwingConstants.CENTER);
+		lblCreacionBarra1.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCreacionBarra1.setBounds(34, 20, 14, 13);
+		panelCreacion.add(lblCreacionBarra1);
+		
+		lblCreacionBarra2 = new JLabel("/");
+		lblCreacionBarra2.setHorizontalAlignment(SwingConstants.CENTER);
+		lblCreacionBarra2.setFont(new Font("Tahoma", Font.BOLD, 10));
+		lblCreacionBarra2.setBounds(70, 20, 14, 13);
+		panelCreacion.add(lblCreacionBarra2);
 
 	}
 
@@ -393,8 +447,6 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 	 */
 	public void VisualizarEquipo() {
 
-		Fecha fechaAltaEntrenador = equipoSeleccionado.getEntrenador().getFechaAlta();
-
 		lblNombreEquipo.setText(equipoSeleccionado.getNombre());
 		// Cargar y mostrar el escudo
 		String escudoPath = equipoSeleccionado.getEscudo();
@@ -414,15 +466,9 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 		lblEntrenadorDatosFechaMes.setText("" + equipoSeleccionado.getEntrenador().getFechaAlta().getMes());
 		lblEntrenadorDatosFechaAño.setText("" + equipoSeleccionado.getEntrenador().getFechaAlta().getAño());
 
-		if (fechaAltaEntrenador.getDia() == 0) {
-			lblEntrenadorDatosFechaDia.setText("1");
-		}
-		if (fechaAltaEntrenador.getMes() == 0) {
-			lblEntrenadorDatosFechaMes.setText("1");
-		}
-		if (fechaAltaEntrenador.getAño() == 0) {
-			lblEntrenadorDatosFechaAño.setText("2024");
-		}
+		lblCreacionDia.setText(""+equipoSeleccionado.getFechaCreacion().getDia());
+		lblCreacionMes.setText(""+equipoSeleccionado.getFechaCreacion().getMes());
+		lblCreacionAño.setText(""+equipoSeleccionado.getFechaCreacion().getAño());
 
 		// Limpiar el DefaultListModel antes de agregar nuevos jugadores
 		jlm.clear();
