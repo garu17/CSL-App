@@ -626,7 +626,7 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 			return;
 		}
 
-		if (elm.getSize() < 1) {
+		if (elm.getSize() < 6) {
 			resaltarCampo(lstEquipos);
 			mostrarError("El número mínimo de equipos permitidos es de 6");
 			return;
