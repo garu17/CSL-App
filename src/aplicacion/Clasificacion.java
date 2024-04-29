@@ -154,7 +154,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 		// Crea un panel
 		panelSuperior = new JPanel();
 		// Propiedades del panel
-		panelSuperior.setBackground(new Color(74, 127, 214));
+		panelSuperior.setBackground(new Color(29, 29, 27));
 		panelSuperior.setBounds(0, 0, 1036, 90);
 		contentPane.add(panelSuperior);
 		panelSuperior.setLayout(null);
@@ -190,7 +190,8 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 		btnEditarTemp.setFont(new Font("Dialog", Font.BOLD, 13));
 		// Propiedades del botón
 		btnEditarTemp.addActionListener(this);
-		btnEditarTemp.setBackground(new Color(20, 185, 255));
+		btnEditarTemp.setBackground(new Color(56, 56, 52));
+		btnEditarTemp.setForeground(new Color(255, 255, 9));
 		btnEditarTemp.setBorder(null);
 		btnEditarTemp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEditarTemp.setFocusable(false);
@@ -219,47 +220,47 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 		btnTemporadas.setFont(new Font("Dialog", Font.BOLD, 15));
 		// Propiedades del botón
 		btnTemporadas.addActionListener(this);
-		btnTemporadas.setForeground(new Color(255, 255, 255));
 		btnTemporadas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnTemporadas.setFocusable(false);
-		btnTemporadas.setBackground(new Color(20, 185, 255));
+		btnTemporadas.setForeground(new Color(255, 255, 9));
+		btnTemporadas.setBackground(new Color(56, 56, 52));
 		btnTemporadas.setBounds(0, 0, 158, 108);
 		panelLateral.add(btnTemporadas);
 
 		// Crea un botón
 		btnClasificacion = new JButton("Clasificación");
-		btnClasificacion.setForeground(new Color(255, 255, 255));
 		btnClasificacion.setFont(new Font("Dialog", Font.BOLD, 15));
 		// Propiedades del botón
 		btnClasificacion.setEnabled(false);
 		btnClasificacion.addActionListener(this);
 		btnClasificacion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnClasificacion.setFocusable(false);
-		btnClasificacion.setBackground(new Color(184, 207, 229));
+		btnClasificacion.setForeground(new Color(255, 255, 9));
+		btnClasificacion.setBackground(new Color(56, 56, 52));
 		btnClasificacion.setBounds(0, 106, 158, 108);
 		panelLateral.add(btnClasificacion);
 
 		// Crea un botón
 		btnJornadas = new JButton("Jornadas");
 		btnJornadas.setFont(new Font("Dialog", Font.BOLD, 15));
-		btnJornadas.setForeground(new Color(255, 255, 255));
 		// Propiedades del botón
 		btnJornadas.addActionListener(this);
 		btnJornadas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnJornadas.setFocusable(false);
-		btnJornadas.setBackground(new Color(20, 185, 255));
+		btnJornadas.setForeground(new Color(255, 255, 9));
+		btnJornadas.setBackground(new Color(56, 56, 52));
 		btnJornadas.setBounds(0, 213, 158, 108);
 		panelLateral.add(btnJornadas);
 
 		// Crea un botón
 		btnEquipos = new JButton("Equipos");
 		btnEquipos.setFont(new Font("Dialog", Font.BOLD, 15));
-		btnEquipos.setForeground(new Color(255, 255, 255));
 		// Propiedades del botón
 		btnEquipos.addActionListener(this);
 		btnEquipos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEquipos.setFocusable(false);
-		btnEquipos.setBackground(new Color(20, 185, 255));
+		btnEquipos.setForeground(new Color(255, 255, 9));
+		btnEquipos.setBackground(new Color(56, 56, 52));
 		btnEquipos.setBounds(0, 318, 158, 108);
 		panelLateral.add(btnEquipos);
 
@@ -268,6 +269,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 		// Propiedades del panel
 		panelCentral.setFocusable(false);
 		panelCentral.setBounds(159, 91, 874, 432);
+		panelCentral.setBackground(new Color(220, 220, 220));
 		contentPane.add(panelCentral);
 		panelCentral.setLayout(null);
 
@@ -291,10 +293,10 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 		btnExportarPDF = new JButton("Exportar PDF");
 		btnExportarPDF.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnExportarPDF.addActionListener(this);
-		btnExportarPDF.setForeground(Color.WHITE);
 		btnExportarPDF.setFocusable(false);
 		btnExportarPDF.setBorder(null);
-		btnExportarPDF.setBackground(new Color(74, 127, 214));
+		btnExportarPDF.setForeground(Color.white);
+		btnExportarPDF.setBackground(new Color(29, 29, 27));
 		btnExportarPDF.setBounds(380, 341, 113, 63);
 		panelCentral.add(btnExportarPDF);
 
@@ -512,7 +514,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
       ctm.setRowCount(0);
 
       // Añadir la primera fila con los encabezados
-      Object[] primeraFila = {"Posición", "Equipo", "Puntos Totales", "Partidos Jugados", "Partidos Ganados", "Partidos Perdidos", "R. Diferencia"};
+      Object[] primeraFila = {"Posición", "Equipo", "Puntos Totales", "Partidas Jugadas", "Partidas Ganadas", "Partidas Perdidas", "R. Diferencia"};
       ctm.addRow(primeraFila);
 
       int posicion = 1;

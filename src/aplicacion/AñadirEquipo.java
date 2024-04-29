@@ -395,7 +395,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		btnVolver = new JButton("Volver");
 		btnVolver.addActionListener(this);
 		btnVolver.setForeground(new Color(255, 255, 255));
-		btnVolver.setBackground(new Color(74, 127, 214));
+		btnVolver.setBackground(new Color(29, 29, 27));
 		btnVolver.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnVolver.setFocusable(false);
 		btnVolver.setBounds(329, 663, 85, 40);
@@ -806,7 +806,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		btnGuardar.setForeground(Color.WHITE);
 		btnGuardar.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnGuardar.setFocusable(false);
-		btnGuardar.setBackground(new Color(74, 127, 214));
+		btnGuardar.setBackground(new Color(29, 29, 27));
 		btnGuardar.setBounds(122, 663, 85, 40);
 		contentPane.add(btnGuardar);
 

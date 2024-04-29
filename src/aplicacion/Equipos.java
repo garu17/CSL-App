@@ -34,6 +34,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.ActionEvent;
 import java.awt.Font;
 import javax.swing.SwingConstants;
+import javax.swing.border.LineBorder;
 
 /**
  * La Clase Equipos.
@@ -142,7 +143,7 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 		// Crea un panel
 		panelSuperior = new JPanel();
 		// Propiedades del panel
-		panelSuperior.setBackground(new Color(74, 127, 214));
+		panelSuperior.setBackground(new Color(29, 29, 27));
 		panelSuperior.setBounds(0, 0, 1036, 90);
 		contentPane.add(panelSuperior);
 		panelSuperior.setLayout(null);
@@ -174,12 +175,11 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 
 		// Crea un botón
 		btnEditarTemp = new JButton("Editar Temporada");
-		btnEditarTemp.setForeground(new Color(255, 255, 255));
 		btnEditarTemp.setFont(new Font("Dialog", Font.BOLD, 13));
 		// Propiedades del botón
 		btnEditarTemp.addActionListener(this);
-		btnEditarTemp.setBackground(new Color(20, 185, 255));
-		btnEditarTemp.setBorder(null);
+		btnEditarTemp.setBackground(new Color(56, 56, 52));
+		btnEditarTemp.setForeground(new Color(255, 255, 9));		btnEditarTemp.setBorder(null);
 		btnEditarTemp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEditarTemp.setFocusable(false);
 		btnEditarTemp.setBounds(848, 22, 156, 45);
@@ -207,47 +207,47 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 		btnTemporadas.setFont(new Font("Dialog", Font.BOLD, 15));
 		// Propiedades del botón
 		btnTemporadas.addActionListener(this);
-		btnTemporadas.setForeground(new Color(255, 255, 255));
 		btnTemporadas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnTemporadas.setFocusable(false);
-		btnTemporadas.setBackground(new Color(20, 185, 255));
+		btnTemporadas.setForeground(new Color(255, 255, 9));
+		btnTemporadas.setBackground(new Color(56, 56, 52));		
 		btnTemporadas.setBounds(0, 0, 158, 108);
 		panelLateral.add(btnTemporadas);
 
 		// Crea un botón
 		btnClasificacion = new JButton("Clasificación");
-		btnClasificacion.setForeground(new Color(255, 255, 255));
 		btnClasificacion.setFont(new Font("Dialog", Font.BOLD, 15));
 		// Propiedades del botón
 		btnClasificacion.addActionListener(this);
 		btnClasificacion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnClasificacion.setFocusable(false);
-		btnClasificacion.setBackground(new Color(20, 185, 255));
+		btnClasificacion.setForeground(new Color(255, 255, 9));
+		btnClasificacion.setBackground(new Color(56, 56, 52));
 		btnClasificacion.setBounds(0, 106, 158, 108);
 		panelLateral.add(btnClasificacion);
 
 		// Crea un botón
 		btnJornadas = new JButton("Jornadas");
-		btnJornadas.setForeground(new Color(255, 255, 255));
 		btnJornadas.setFont(new Font("Dialog", Font.BOLD, 15));
 		// Propiedades del botón
 		btnJornadas.addActionListener(this);
 		btnJornadas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnJornadas.setFocusable(false);
-		btnJornadas.setBackground(new Color(20, 185, 255));
+		btnJornadas.setForeground(new Color(255, 255, 9));
+		btnJornadas.setBackground(new Color(56, 56, 52));
 		btnJornadas.setBounds(0, 213, 158, 108);
 		panelLateral.add(btnJornadas);
 
 		// Crea un botón
 		btnEquipos = new JButton("Equipos");
 		btnEquipos.setFont(new Font("Dialog", Font.BOLD, 15));
-		btnEquipos.setForeground(new Color(255, 255, 255));
 		// Propiedades del botón
 		btnEquipos.setEnabled(false);
 		btnEquipos.addActionListener(this);
 		btnEquipos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEquipos.setFocusable(false);
-		btnEquipos.setBackground(new Color(184, 207, 229));
+		btnEquipos.setForeground(new Color(255, 255, 9));
+		btnEquipos.setBackground(new Color(56, 56, 52));
 		btnEquipos.setBounds(0, 318, 158, 108);
 		panelLateral.add(btnEquipos);
 
@@ -256,12 +256,14 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 		// Propiedades del panel
 		panelCentral.setFocusable(false);
 		panelCentral.setBounds(159, 91, 874, 432);
+		panelCentral.setBackground(new Color(220, 220, 220));
 		contentPane.add(panelCentral);
 		panelCentral.setLayout(null);
 
 		elm = new DefaultListModel<Equipo>();
 
 		lstEquipos = new JList<Equipo>();
+		lstEquipos.setBorder(new LineBorder(new Color(0, 0, 0)));
 		lstEquipos.setBackground(new Color(227, 227, 227));
 		lstEquipos.setFont(new Font("Dialog", Font.BOLD, 20));
 		lstEquipos.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);

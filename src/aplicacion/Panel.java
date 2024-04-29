@@ -172,7 +172,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 		btnVolver = new JButton("Volver");
 		btnVolver.addActionListener(this);
 		btnVolver.setForeground(new Color(255, 255, 255));
-		btnVolver.setBackground(new Color(74, 127, 214));
+		btnVolver.setBackground(new Color(29, 29, 27));
 		btnVolver.setFont(new Font("Tahoma", Font.BOLD, 10));
 		btnVolver.setFocusable(false);
 		btnVolver.setBounds(166, 640, 85, 40);

@@ -183,7 +183,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		// Crea un panel
 		panelSuperior = new JPanel();
 		// Establece el color de fondo
-		panelSuperior.setBackground(new Color(74, 127, 214));
+		panelSuperior.setBackground(new Color(29, 29, 27));
 		// Establece posicion y tamaño
 		panelSuperior.setBounds(0, 0, 1036, 90);
 		// Hace el panel absoluto
@@ -229,8 +229,8 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		// Añade accion de tipo listener al boton
 		btnEditarTemp.addActionListener(this);
 		// Propiedades del boton
-		btnEditarTemp.setBackground(new Color(20, 185, 255));
-		btnEditarTemp.setForeground(Color.WHITE);
+		btnEditarTemp.setBackground(new Color(56, 56, 52));
+		btnEditarTemp.setForeground(new Color(255, 255, 9));
 		btnEditarTemp.setBorder(null);
 		btnEditarTemp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEditarTemp.setFocusable(false);
@@ -261,38 +261,38 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		btnTemporadas = new JButton("Temporadas");
 		btnTemporadas.setFont(new Font("Dialog", Font.BOLD, 15));
 		btnTemporadas.setEnabled(false);
-		btnTemporadas.setForeground(Color.WHITE);
 		// Añade accion de tipo listener al botón
 		btnTemporadas.addActionListener(this);
 		btnTemporadas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnTemporadas.setFocusable(false);
-		btnTemporadas.setBackground(new Color(184, 207, 229));
+		btnTemporadas.setForeground(new Color(255, 255, 9));
+		btnTemporadas.setBackground(new Color(56, 56, 52));
 		btnTemporadas.setBounds(0, 0, 158, 108);
 		panelLateral.add(btnTemporadas);
 
 		// Crea un botón
 		btnClasificacion = new JButton("Clasificación");
 		btnClasificacion.setFont(new Font("Dialog", Font.BOLD, 15));
-		btnClasificacion.setForeground(Color.WHITE);
 		// Añade accion de tipo listener al botón
 		btnClasificacion.addActionListener(this);
 		// Propiedades del botón
 		btnClasificacion.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnClasificacion.setFocusable(false);
-		btnClasificacion.setBackground(new Color(20, 185, 255));
+		btnClasificacion.setForeground(new Color(255, 255, 9));
+		btnClasificacion.setBackground(new Color(56, 56, 52));
 		btnClasificacion.setBounds(0, 106, 158, 108);
 		panelLateral.add(btnClasificacion);
 
 		// Crea un botón
 		btnJornadas = new JButton("Jornadas");
 		btnJornadas.setFont(new Font("Dialog", Font.BOLD, 15));
-		btnJornadas.setForeground(Color.WHITE);
 		// Añade accion de tipo listener al botón
 		btnJornadas.addActionListener(this);
 		// Propiedades del botón
 		btnJornadas.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnJornadas.setFocusable(false);
-		btnJornadas.setBackground(new Color(20, 185, 255));
+		btnJornadas.setForeground(new Color(255, 255, 9));
+		btnJornadas.setBackground(new Color(56, 56, 52));
 		btnJornadas.setBounds(0, 213, 158, 108);
 		panelLateral.add(btnJornadas);
 
@@ -305,14 +305,15 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		// Propiedades del botón
 		btnEquipos.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEquipos.setFocusable(false);
-		btnEquipos.setBackground(new Color(20, 185, 255));
+		btnEquipos.setForeground(new Color(255, 255, 9));
+		btnEquipos.setBackground(new Color(56, 56, 52));
 		btnEquipos.setBounds(0, 318, 158, 108);
 		panelLateral.add(btnEquipos);
 
 		panelCentral = new JPanel();
 		panelCentral.setFocusable(false);
 		panelCentral.setBounds(159, 91, 874, 432);
-		panelCentral.setBackground(new Color(240, 240, 240));
+		panelCentral.setBackground(new Color(220, 220, 220));
 		contentPane.add(panelCentral);
 		panelCentral.setLayout(null);
 
@@ -321,7 +322,8 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		btnAñadirTemp.setFocusable(false);
 		btnAñadirTemp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnAñadirTemp.setBorder(null);
-		btnAñadirTemp.setBackground(new Color(74, 127, 214));
+		btnAñadirTemp.setForeground(Color.WHITE);
+		btnAñadirTemp.setBackground(new Color(29, 29, 27));
 		btnAñadirTemp.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnAñadirTemp.addActionListener(this);
 		btnAñadirTemp.setBounds(79, 348, 186, 46);
@@ -331,8 +333,8 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		btnEliminarTemp.setFocusable(false);
 		btnEliminarTemp.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnEliminarTemp.setBorder(null);
-		btnEliminarTemp.setForeground(new Color(255, 255, 255));
-		btnEliminarTemp.setBackground(new Color(74, 127, 214));
+		btnEliminarTemp.setForeground(Color.WHITE);
+		btnEliminarTemp.setBackground(new Color(29, 29, 27));
 		btnEliminarTemp.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnEliminarTemp.addActionListener(this);
 		btnEliminarTemp.setBounds(609, 348, 186, 46);
@@ -371,12 +373,12 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		panelCentral.add(scrollPane);
 
 		btnXML = new JButton("Exportar XML");
-		btnXML.setForeground(Color.WHITE);
 		btnXML.addActionListener(this);
 		btnXML.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnXML.setFocusable(false);
 		btnXML.setBorder(null);
-		btnXML.setBackground(new Color(74, 127, 214));
+		btnXML.setForeground(Color.white);
+		btnXML.setBackground(new Color(29, 29, 27));
 		btnXML.setBounds(344, 348, 186, 46);
 		panelCentral.add(btnXML);
 
@@ -651,19 +653,13 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 
 				}
 				
-				// Creo las variables
-				Inicio I = new Inicio();
-				// Muestro la ventana Registro
-				I.setVisible(true);
-				
-				dispose();
 
 				Seleccion.setTemporadaPosicion(null);
 				Seleccion.setTemporadaSeleccionada(null);
 				lblTemporada.setText("Seleccionar Temporada");
-
+				
 				ordenarTemporadas();
-
+				
 				if (Seleccion.getTemporadaSeleccionada() == null && !tlm.isEmpty()
 						&& tlm.firstElement().getEstado().equals("ACTIVA")) {
 					Seleccion.setTemporadaSeleccionada(tlm.firstElement());
@@ -677,6 +673,14 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 					btnAñadirTemp.setBounds(204, 348, 186, 46);
 					btnEliminarTemp.setBounds(464, 348, 186, 46);
 				}
+
+				// Creo las variables
+				Inicio I = new Inicio();
+				// Muestro la ventana Registro
+				I.setVisible(true);
+				
+				dispose();
+
 			}
 
 		} else {

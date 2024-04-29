@@ -208,7 +208,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		contentPane.setLayout(null);
 
 		panelSuperior = new JPanel();
-		panelSuperior.setBackground(new Color(74, 127, 214));
+		panelSuperior.setBackground(new Color(29, 29, 27));
 		panelSuperior.setBounds(0, 0, 1236, 90);
 		contentPane.add(panelSuperior);
 		panelSuperior.setLayout(null);
@@ -243,6 +243,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		panelCentral = new JPanel();
 		panelCentral.setFocusable(false);
 		panelCentral.setBounds(0, 91, 1236, 432);
+		panelCentral.setBackground(new Color(220, 220, 220));
 		contentPane.add(panelCentral);
 		panelCentral.setLayout(null);
 
@@ -253,7 +254,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		btnGuardar.setFocusable(false);
 		btnGuardar.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		btnGuardar.setBorder(null);
-		btnGuardar.setBackground(new Color(74, 127, 214));
+		btnGuardar.setBackground(new Color(29, 29, 27));
 		btnGuardar.setBounds(457, 355, 119, 45);
 		panelCentral.add(btnGuardar);
 
@@ -273,7 +274,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		btnFinalizar.setFocusable(false);
 		btnFinalizar.addActionListener(this);
 		btnFinalizar.setBorder(null);
-		btnFinalizar.setBackground(new Color(74, 127, 214));
+		btnFinalizar.setBackground(new Color(29, 29, 27));
 		btnFinalizar.setBounds(328, 355, 119, 45);
 		panelCentral.add(btnFinalizar);
 		// Ocultar el boton
@@ -398,7 +399,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		btnIniciar.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnIniciar.setFocusable(false);
 		btnIniciar.setBorder(null);
-		btnIniciar.setBackground(new Color(74, 127, 214));
+		btnIniciar.setBackground(new Color(29, 29, 27));
 		btnIniciar.setBounds(763, 355, 119, 45);
 		panelCentral.add(btnIniciar);
 
@@ -1053,8 +1054,8 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		ctm.setRowCount(0);
 
 		// Añadir la primera fila con los encabezados
-		Object[] primeraFila = { "Posición", "Equipo", "Puntos Totales", "Partidos Jugados", "Partidos Ganados",
-				"Partidos Perdidos", "R. Diferencia" };
+		Object[] primeraFila = { "Posición", "Equipo", "Puntos Totales", "Partidas Jugadas", "Partidas Ganadas",
+				"Partidas Perdidas", "R. Diferencia" };
 		ctm.addRow(primeraFila);
 
 		int posicion = 1;

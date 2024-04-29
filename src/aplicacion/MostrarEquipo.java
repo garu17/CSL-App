@@ -185,7 +185,7 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 		btnVolver = new JButton("Volver");
 		btnVolver.addActionListener(this);
 		btnVolver.setForeground(new Color(255, 255, 255));
-		btnVolver.setBackground(new Color(74, 127, 214));
+		btnVolver.setBackground(new Color(29, 29, 27));
 		btnVolver.setFont(new Font("Dialog", Font.BOLD, 13));
 		btnVolver.setFocusable(false);
 		btnVolver.setBounds(225, 648, 85, 40);
