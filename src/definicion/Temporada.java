@@ -323,7 +323,7 @@ public class Temporada implements Comparable<Temporada>, Serializable {
           Fecha fechaAltaEntrenador = convertirAFecha(fechaAltaEntrenadorSql);
 
           // Cargar jugadores para este equipo
-          List<Jugador> jugadores = cargarJugadoresPorEquipo(conexion, nombreEquipo);
+          List<Jugador> jugadores = cargarJugadoresPorEquipo(conexion, nombreEquipo, numeroTemporada);
 
           // Crear objeto Entrenador
           Participante participante = new Participante(dniEntrenador, nombreEntrenador, apellidoEntrenador, nacionalidadEntrenador);
@@ -341,15 +341,16 @@ public class Temporada implements Comparable<Temporada>, Serializable {
       return equipos;
   }
 
-  private static List<Jugador> cargarJugadoresPorEquipo(Connection conexion, String nombreEquipo) throws SQLException {
+  private static List<Jugador> cargarJugadoresPorEquipo(Connection conexion, String nombreEquipo, int numeroTemporada) throws SQLException {
       List<Jugador> jugadores = new ArrayList<>();
       String queryJugadores = "SELECT j.DNI, jc.Nombre, jc.Apellido, jc.Nacionalidad, jc.Foto, jc.Rol, j.FechaNacimiento " +
               "FROM jugadorcontratado jc " +
               "JOIN jugador j ON jc.Jugador = j.DNI " +
-              "WHERE jc.Equipo = ?";
+              "WHERE jc.Equipo = ? AND jc.Temporada = ?";
 
       PreparedStatement psJugadores = conexion.prepareStatement(queryJugadores);
       psJugadores.setString(1, nombreEquipo);
+      psJugadores.setInt(2, numeroTemporada);
       ResultSet rsJugadores = psJugadores.executeQuery();
 
       while (rsJugadores.next()) {
@@ -464,7 +465,7 @@ public class Temporada implements Comparable<Temporada>, Serializable {
 	        Fecha fechaAltaEntrenador = convertirAFecha(fechaAltaEntrenadorSql);
 
 	        // Cargar jugadores para este equipo
-	        List<Jugador> jugadores = cargarJugadoresPorEquipo(conexion, nombreEquipo);
+	        List<Jugador> jugadores = cargarJugadoresPorEquipo(conexion, nombreEquipo, numeroTemporada);
 
 	        // Crear objeto Entrenador
 	        Participante participante = new Participante(dniEntrenador, nombreEntrenador, apellidoEntrenador, nacionalidadEntrenador);

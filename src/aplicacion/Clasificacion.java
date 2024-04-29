@@ -6,6 +6,11 @@ import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.File;
 import java.io.IOException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
@@ -488,7 +493,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 	/**
 	 * Funcion para Llenar la Tabla.
 	 */
-	private void llenarTabla() {
+   private void llenarTabla() {
 		// Ordenar la lista de equipos por estadísticas en orden descendente
 		ListaEquipos.sort((equipo1, equipo2) -> {
 			Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
@@ -501,74 +506,86 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 			}
 			return 0;
 		});
+      Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
 
-		// Variable para asignar la posición de cada equipo
-		int posicion = 0;
+      // Limpiar el modelo de datos de la tabla
+      ctm.setRowCount(0);
 
-		// Se reinicia el modelo de datos de la tabla
-		ctm.setRowCount(0);
+      // Añadir la primera fila con los encabezados
+      Object[] primeraFila = {"Posición", "Equipo", "Puntos Totales", "Partidos Jugados", "Partidos Ganados", "Partidos Perdidos", "R. Diferencia"};
+      ctm.addRow(primeraFila);
 
-		// Se crea la primera fila por defecto de la Clasificación
-		Object[] primerafila = new Object[] { "Posicion:", "Equipo:", "P.Totales:", "P.Jugadas:", "P.Ganadas:",
-				"P.Perdidas:", "R.Diferencia:" };
-		ctm.addRow(primerafila);
+      int posicion = 1;
 
-		// Iterar sobre la lista de equipos para llenar la tabla
-		for (Equipo equipo : ListaEquipos) {
-			if (!equipo.getNombre().equals("Equipo para Descansar")) {
+      for (Equipo equipo : ListaEquipos) {
+          if (!equipo.getNombre().equals("Equipo para Descansar")) {
+              Estadisticas estadisticas = obtenerEstadisticasEquipo(equipo, temporadaActual);
 
-				// Se obtienen las estadísticas del Equipo en esa Temporada
-				Estadisticas estadisticas = obtenerEstadisticasEquipo(equipo, Seleccion.getTemporadaSeleccionada());
+              Object[] fila = new Object[7];
+              fila[0] = posicion;
+              fila[1] = equipo.getNombre();
 
-				// Crear una fila de datos para la tabla
-				Object[] fila = new Object[7];
-				fila[0] = posicion + 1;
-				fila[1] = equipo.getNombre();
+              if (estadisticas != null) {
+                  fila[2] = estadisticas.getPuntosTotales();
+                  fila[3] = estadisticas.getPartidosJugados();
+                  fila[4] = estadisticas.getPartidosGanados();
+                  fila[5] = estadisticas.getPartidosPerdidos();
+                  fila[6] = estadisticas.getRondasDiferencia();
+              } else {
+                  fila[2] = 0;
+                  fila[3] = 0;
+                  fila[4] = 0;
+                  fila[5] = 0;
+                  fila[6] = 0;
+              }
 
-				// Se verifica si hay datos en las Estadísticas
-				if (estadisticas != null) {
-					fila[2] = estadisticas.getPuntosTotales();
-					fila[3] = estadisticas.getPartidosJugados();
-					fila[4] = estadisticas.getPartidosGanados();
-					fila[5] = estadisticas.getPartidosPerdidos();
-					fila[6] = estadisticas.getRondasDiferencia();
-				} else {
-					// En caso de que no haya datos, se asigna 0 a todo
-					fila[2] = 0;
-					fila[3] = 0;
-					fila[4] = 0;
-					fila[5] = 0;
-					fila[6] = 0;
-				}
+              ctm.addRow(fila);
+              posicion++;
+          }
+      }
+  }
 
-				// Agregar la fila a la tabla
-				ctm.addRow(fila);
+  /**
+   * Función para obtener las estadísticas de un equipo en una temporada específica desde la base de datos.
+   *
+   * @param equipo     el equipo del que se desean obtener las estadísticas
+   * @param temporada  la temporada de la que se desean obtener las estadísticas
+   * @return las estadísticas del equipo para la temporada especificada
+   */
+  private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
+      Estadisticas estadisticas = null;
 
-				// Incrementar la posición
-				posicion++;
-			}
-		}
-	}
+      try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+          String query = "SELECT * FROM estadisticas WHERE Temporada = ? AND Equipo = ?";
+          PreparedStatement ps = conn.prepareStatement(query);
+          ps.setInt(1, temporada.getNumero());
+          ps.setString(2, equipo.getNombre());
 
-	/**
-	 * Funcion para Obtener las Estadisticas de un Equipo.
-	 *
-	 * @param equipo    el Equipo
-	 * @param temporada la Temporada
-	 * @return las Estadisticas
-	 */
-	private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
-		// Recorrer todas las esetadisticas por temporada que tiene un equipo
-		for (Estadisticas est : equipo.getEstadisticasPorTemporada()) {
-			// Cuando encuentre las Estadisticas que corresponden con la temporada que
-			// buscamos
-			if (est.getTemporada().equals(temporada)) {
-				return est;
-			}
-		}
-		// No se han Encontrado las Estadisticas
-		return null;
-	}
+          ResultSet rs = ps.executeQuery();
+
+          if (rs.next()) {
+              int puntosTotales = rs.getInt("PuntosTotales");
+              int partidosJugados = rs.getInt("PartidasJugadas");
+              int partidosGanados = rs.getInt("PartidasGanadas");
+              int partidosPerdidos = rs.getInt("PartidasPerdidas");
+              int rondasDiferencia = rs.getInt("RondasDiferencia");
+
+              estadisticas = new Estadisticas(temporada);
+              estadisticas.setPuntosTotales(puntosTotales);
+              estadisticas.setPartidosJugados(partidosJugados);
+              estadisticas.setPartidosGanados(partidosGanados);
+              estadisticas.setPartidosPerdidos(partidosPerdidos);
+              estadisticas.setRondasDiferencia(rondasDiferencia);
+          }
+
+          rs.close();
+          ps.close();
+      } catch (SQLException e) {
+          e.printStackTrace();
+      }
+
+      return estadisticas;
+  }
 
 	/**
 	 * Funcion To PDF.

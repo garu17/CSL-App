@@ -10,6 +10,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -126,7 +130,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 
 	/** La Lista de Movimientos Totales que hay Registrados. */
 	private ArrayList<Logger> ListaMovimientos;
-	
+
 	/** La Lista de Usuarios Registrados. */
 	private List<Usuario> ListaUsuarios;
 
@@ -407,7 +411,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 			btnAñadirTemp.setBounds(204, 348, 186, 46);
 			btnEliminarTemp.setBounds(464, 348, 186, 46);
 		}
-		
+
 		// Se conecta a la base de datos
 		// crea una base de datos si todavía no existe
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("$objectdb/db/usuarios.odb");
@@ -416,7 +420,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		// Utiliza una consulta JPQL para obtener todos los usuarios
 		TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u", Usuario.class);
 		ListaUsuarios = query.getResultList();
-		
+
 		// Cierro la conexion con la base de datos
 		em.close();
 		emf.close();
@@ -526,12 +530,13 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 					"Confirmación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 			if (opcion == JOptionPane.YES_OPTION) {
+
 				// Obtener la temporada a eliminar
-				Temporada temporadaAEliminar = ListaTemporadas.get(indiceSeleccionado);
+				Temporada Temporada = ListaTemporadas.get(indiceSeleccionado);
 
 				// Eliminar las carpetas correspondientes a la temporada en Escudos y Jugadores
-				String carpetaEscudos = "ficheros/Escudos/Temporada" + temporadaAEliminar.getNumero();
-				String carpetaJugadores = "ficheros/Jugadores/Temporada" + temporadaAEliminar.getNumero();
+				String carpetaEscudos = "ficheros/Escudos/Temporada" + Temporada.getNumero();
+				String carpetaJugadores = "ficheros/Jugadores/Temporada" + Temporada.getNumero();
 
 				File carpetaEscudosFile = new File(carpetaEscudos);
 				File carpetaJugadoresFile = new File(carpetaJugadores);
@@ -549,11 +554,72 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 				Logger.nuevoMovimiento(ListaMovimientos,
 						"Ha eliminado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
 
+				try {
+					// Crear la conexión a la base de datos
+					Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+					conn.setAutoCommit(false); // Desactivar el modo de autocommit
+
+					// Eliminar registros de temporadaparticipada para la temporada
+					String deleteTemporadaParticipadaQuery = "DELETE FROM temporadaparticipada WHERE Temporada = ?";
+					PreparedStatement psDeleteTemporadaParticipada = conn.prepareStatement(deleteTemporadaParticipadaQuery);
+					psDeleteTemporadaParticipada.setInt(1, Temporada.getNumero());
+					psDeleteTemporadaParticipada.executeUpdate();
+
+					// Eliminar registros de entrenadorcontratado para la temporada
+					String deleteEntrenadorContratadoQuery = "DELETE FROM entrenadorcontratado WHERE Temporada = ?";
+					PreparedStatement psDeleteEntrenadorContratado = conn.prepareStatement(deleteEntrenadorContratadoQuery);
+					psDeleteEntrenadorContratado.setInt(1, Temporada.getNumero());
+					psDeleteEntrenadorContratado.executeUpdate();
+
+					// Eliminar registros de estadisticas para la temporada
+					String deleteEstadisticasQuery = "DELETE FROM estadisticas WHERE Temporada = ?";
+					PreparedStatement psDeleteEstadisticas = conn.prepareStatement(deleteEstadisticasQuery);
+					psDeleteEstadisticas.setInt(1, Temporada.getNumero());
+					psDeleteEstadisticas.executeUpdate();
+
+					// Eliminar registros de jugadorcontratado para la temporada
+					String deleteJugadorContratadoQuery = "DELETE FROM jugadorcontratado WHERE Temporada = ?";
+					PreparedStatement psDeleteJugadorContratado = conn.prepareStatement(deleteJugadorContratadoQuery);
+					psDeleteJugadorContratado.setInt(1, Temporada.getNumero());
+					psDeleteJugadorContratado.executeUpdate();
+
+					// Eliminar registros de jornada para la temporada
+					String deleteJornadaQuery = "DELETE FROM jornada WHERE Temporada = ?";
+					PreparedStatement psDeleteJornada = conn.prepareStatement(deleteJornadaQuery);
+					psDeleteJornada.setInt(1, Temporada.getNumero());
+					psDeleteJornada.executeUpdate();
+
+					// Eliminar temporadas anteriores con el mismo número
+					String deleteTemporadaQuery = "DELETE FROM temporada WHERE Numero = ?";
+					PreparedStatement psDeleteTemporada = conn.prepareStatement(deleteTemporadaQuery);
+					psDeleteTemporada.setInt(1, Temporada.getNumero());
+					psDeleteTemporada.executeUpdate();
+
+					// Confirmar la transacción
+					conn.commit();
+
+					// Cerrar las conexiones preparadas
+					psDeleteTemporada.close();
+					psDeleteTemporadaParticipada.close();
+					psDeleteEntrenadorContratado.close();
+					psDeleteEstadisticas.close();
+					psDeleteJugadorContratado.close();
+					psDeleteJornada.close();
+
+					// Cerrar la conexión
+					conn.close();
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(this, "Error al eliminar datos de la temporada en la base de datos.",
+							"Error", JOptionPane.ERROR_MESSAGE);
+					return;
+				}
+
+				tlm.removeElementAt(indiceSeleccionado);
+
 				// Verificar si la temporada eliminada es la activa
-				if (temporadaAEliminar.getEstado().equals("ACTIVA")) {
-					// Elimino la temporada seleccionada del DefaultListModel y de la lista original
-					tlm.removeElementAt(indiceSeleccionado);
-					ListaTemporadas.remove(indiceSeleccionado);
+				if (Temporada.getEstado().equals("ACTIVA")) {
 
 					// Buscar temporada con el estado "PROXIMAMENTE"
 					DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
@@ -583,18 +649,19 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 						}
 					}
 
-				} else {
-					// Elimino la temporada seleccionada del DefaultListModel y de la lista original
-					tlm.removeElementAt(indiceSeleccionado);
-					ListaTemporadas.remove(indiceSeleccionado);
 				}
+				
+				// Creo las variables
+				Inicio I = new Inicio();
+				// Muestro la ventana Registro
+				I.setVisible(true);
+				
+				dispose();
 
 				Seleccion.setTemporadaPosicion(null);
 				Seleccion.setTemporadaSeleccionada(null);
 				lblTemporada.setText("Seleccionar Temporada");
 
-				// Guardo la lista actualizada en el archivo
-				Temporada.guardarTemporadas(ListaTemporadas);
 				ordenarTemporadas();
 
 				if (Seleccion.getTemporadaSeleccionada() == null && !tlm.isEmpty()
@@ -941,7 +1008,8 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 
 		} catch (IOException e) {
 			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "Error al exportar a XML de Temporadas", "Error", JOptionPane.ERROR_MESSAGE);
+			JOptionPane.showMessageDialog(this, "Error al exportar a XML de Temporadas", "Error",
+					JOptionPane.ERROR_MESSAGE);
 		}
 
 		// Archivo XML para todas las temporadas
@@ -1172,7 +1240,6 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		for (Temporada temporada : ListaTemporadas) {
 			tlm.addElement(temporada);
 		}
-		Temporada.guardarTemporadas(ListaTemporadas);
 	}
 
 	/**

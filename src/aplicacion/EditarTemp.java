@@ -40,6 +40,7 @@ import java.awt.event.WindowListener;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
@@ -417,17 +418,16 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		ListaEquipos = Seleccion.getTemporadaSeleccionada().getListaEquipos();
 		ListaEquiposRegistrados = Equipo.cargarEquipos();
 
-		
 		Boolean hayActiva = false;
-		
+
 		// Si hay una temporada ya activa
 		for (Temporada temporada : ListaTemporadas) {
 			if ("ACTIVA".equals(temporada.getEstado())) {
 				hayActiva = true;
 				break;
 			}
-		} 
-		
+		}
+
 		if (!hayActiva) {
 			btnIniciar.setBounds(484, 355, 119, 45);
 			btnGuardar.setBounds(640, 355, 119, 45);
@@ -844,8 +844,8 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			// Borra las estadísticas por temporada después de recorrer todas las jornadas
 			for (Jornada jornada : ListaJornadas) {
 				for (Partido partido : jornada.getListaPartidos()) {
-					partido.getEquipoLocal().getEstadisticasPorTemporada().clear();
-					partido.getEquipoVisitante().getEstadisticasPorTemporada().clear();
+					Equipo.limpiarEstadisticasEquipo(Seleccion.getTemporadaSeleccionada(), partido.getEquipoLocal().getNombre());
+					Equipo.limpiarEstadisticasEquipo(Seleccion.getTemporadaSeleccionada(), partido.getEquipoVisitante().getNombre());
 				}
 			}
 
@@ -856,7 +856,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 						.getView();
 				// Se busca la Jornada en concreto dentro de la lista de jornadas
 				Jornada jornada = ListaJornadas.get(i);
-
+				
 				// Se recorre cada partido de cada jornada
 				for (Partido partido : jornada.getListaPartidos()) {
 
@@ -906,13 +906,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 														JOptionPane.ERROR_MESSAGE);
 												return;
 											}
-											// Verificar que ambos equipos no tengan 13 puntos al mismo tiempo
-											if (puntos == 13 && partido.getPuntosVisitante() == 13) {
-												JOptionPane.showMessageDialog(null,
-														"En un partido hay dos equipos que tienen 13 puntos.", "Error de entrada",
-														JOptionPane.ERROR_MESSAGE);
-												return;
-											}
+
 											partido.setPuntosLocal(puntos);
 										} else if (equipo.equals("visitante")) {
 											if (puntos > 13) {
@@ -932,7 +926,8 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 
 											// Verificar que al menos un equipo tenga 13 puntos
 											if (partido.getPuntosLocal() != -1 && partido.getPuntosVisitante() != -1
-													&& partido.getPuntosLocal() != 13 && partido.getPuntosVisitante() != 13) {
+													&& partido.getPuntosLocal() != 13 && partido.getPuntosVisitante() != 13
+													&& partido.getPuntosLocal() != 0 && partido.getPuntosVisitante() != 0) {
 												JOptionPane.showMessageDialog(null, "Uno de los equipos debe tener 13 puntos.",
 														"Error de entrada", JOptionPane.ERROR_MESSAGE);
 												return;
@@ -982,35 +977,41 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().remove(partido.getEquipoVisitante());
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().add(partido.getEquipoLocal());
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().add(partido.getEquipoVisitante());
-					
+
 					try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
-				        conn.setAutoCommit(false); // Desactivar el modo de autocommit
+						conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
-				        // Crear la consulta SQL para actualizar las estadísticas
-				        String updateEstadisticasQuery = "UPDATE partido SET PuntosLocal = ?, PuntosVisitante = ?, Jugado = ? WHERE Temporada = ? AND Jornada = ? AND EquipoLocal = ? AND EquipoVisitante = ?";
-				        PreparedStatement psUpdateEstadisticas = conn.prepareStatement(updateEstadisticasQuery);
+						// Crear la consulta SQL para actualizar las estadísticas
+						String updateEstadisticasQuery = "UPDATE partido SET PuntosLocal = ?, PuntosVisitante = ?, Jugado = ? WHERE Temporada = ? AND Jornada = ? AND EquipoLocal = ? AND EquipoVisitante = ?";
+						PreparedStatement psUpdateEstadisticas = conn.prepareStatement(updateEstadisticasQuery);
 
-				        // Asignar los valores a los parámetros de la consulta
-				        psUpdateEstadisticas.setInt(1, partido.getPuntosLocal());
-				        psUpdateEstadisticas.setInt(2, partido.getPuntosVisitante());
-				        psUpdateEstadisticas.setBoolean(3, true);
-				        psUpdateEstadisticas.setInt(4, Seleccion.getTemporadaNumero());
-				        psUpdateEstadisticas.setInt(5, jornada.getNumero());
-				        psUpdateEstadisticas.setString(6, partido.getEquipoLocal().getNombre());
-				        psUpdateEstadisticas.setString(7, partido.getEquipoVisitante().getNombre());
+						// Asignar los valores a los parámetros de la consulta
+						if (partido.getPuntosLocal() == -1 && partido.getPuntosVisitante() == -1) {
+							psUpdateEstadisticas.setInt(1, 0);
+							psUpdateEstadisticas.setInt(2, 0);
+							psUpdateEstadisticas.setBoolean(3, false);
+						} else {
+							psUpdateEstadisticas.setInt(1, partido.getPuntosLocal());
+							psUpdateEstadisticas.setInt(2, partido.getPuntosVisitante());
+							psUpdateEstadisticas.setBoolean(3, true);
+						}
+						psUpdateEstadisticas.setInt(4, Seleccion.getTemporadaNumero());
+						psUpdateEstadisticas.setInt(5, jornada.getNumero());
+						psUpdateEstadisticas.setString(6, partido.getEquipoLocal().getNombre());
+						psUpdateEstadisticas.setString(7, partido.getEquipoVisitante().getNombre());
 
-				        // Ejecutar la consulta de actualización
-				        psUpdateEstadisticas.executeUpdate();
+						// Ejecutar la consulta de actualización
+						psUpdateEstadisticas.executeUpdate();
 
-				        // Confirmar la transacción
-				        conn.commit();
+						// Confirmar la transacción
+						conn.commit();
 
-				        // Cerrar el PreparedStatement
-				        psUpdateEstadisticas.close();
-				    } catch (SQLException e) {
-				        e.printStackTrace();
-				        // Manejar el error apropiadamente
-				    }
+						// Cerrar el PreparedStatement
+						psUpdateEstadisticas.close();
+					} catch (SQLException e) {
+						e.printStackTrace();
+						// Manejar el error apropiadamente
+					}
 				}
 			}
 
@@ -1029,9 +1030,10 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	}
 
 	/**
-	 * Funcion para Llenar la Tabla.
+	 * Función para llenar la tabla con datos de estadísticas desde la base de
+	 * datos.
 	 */
-	private void llenarTabla() {
+	private void llenarTabla() {		
 		// Ordenar la lista de equipos por estadísticas en orden descendente
 		ListaEquipos.sort((equipo1, equipo2) -> {
 			Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
@@ -1044,31 +1046,27 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			}
 			return 0;
 		});
+		
+		Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
 
-		// Variable para asignar la posición de cada equipo
-		int posicion = 0;
-
-		// Se reinicia el modelo de datos de la tabla
+		// Limpiar el modelo de datos de la tabla
 		ctm.setRowCount(0);
 
-		// Se crea la primera fila por defecto de la Clasificación
-		Object[] primerafila = new Object[] { "Posicion:", "Equipo:", "P.Totales:", "P.Jugadas:", "P.Ganadas:",
-				"P.Perdidas:", "R.Diferencia:" };
-		ctm.addRow(primerafila);
+		// Añadir la primera fila con los encabezados
+		Object[] primeraFila = { "Posición", "Equipo", "Puntos Totales", "Partidos Jugados", "Partidos Ganados",
+				"Partidos Perdidos", "R. Diferencia" };
+		ctm.addRow(primeraFila);
 
-		// Iterar sobre la lista de equipos para llenar la tabla
+		int posicion = 1;
+
 		for (Equipo equipo : ListaEquipos) {
 			if (!equipo.getNombre().equals("Equipo para Descansar")) {
+				Estadisticas estadisticas = obtenerEstadisticasEquipo(equipo, temporadaActual);
 
-				// Se obtienen las estadísticas del Equipo en esa Temporada
-				Estadisticas estadisticas = obtenerEstadisticasEquipo(equipo, Seleccion.getTemporadaSeleccionada());
-
-				// Crear una fila de datos para la tabla
 				Object[] fila = new Object[7];
-				fila[0] = posicion + 1;
+				fila[0] = posicion;
 				fila[1] = equipo.getNombre();
 
-				// Se verifica si hay datos en las Estadísticas
 				if (estadisticas != null) {
 					fila[2] = estadisticas.getPuntosTotales();
 					fila[3] = estadisticas.getPartidosJugados();
@@ -1076,7 +1074,6 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					fila[5] = estadisticas.getPartidosPerdidos();
 					fila[6] = estadisticas.getRondasDiferencia();
 				} else {
-					// En caso de que no haya datos, se asigna 0 a todo
 					fila[2] = 0;
 					fila[3] = 0;
 					fila[4] = 0;
@@ -1084,201 +1081,243 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					fila[6] = 0;
 				}
 
-				// Agregar la fila a la tabla
 				ctm.addRow(fila);
-
-				// Incrementar la posición
 				posicion++;
 			}
 		}
 	}
 
 	/**
-	 * Funcion para Obtener las Estadisticas de un Equipo.
+	 * Función para obtener las estadísticas de un equipo en una temporada
+	 * específica desde la base de datos.
 	 *
-	 * @param equipo    el Equipo
-	 * @param temporada la Temporada
-	 * @return las Estadisticas
+	 * @param equipo    el equipo del que se desean obtener las estadísticas
+	 * @param temporada la temporada de la que se desean obtener las estadísticas
+	 * @return las estadísticas del equipo para la temporada especificada
 	 */
 	private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
-		// Recorrer todas las esetadisticas por temporada que tiene un equipo
-		for (Estadisticas est : equipo.getEstadisticasPorTemporada()) {
-			// Cuando encuentre las Estadisticas que corresponden con la temporada que
-			// buscamos
-			if (est.getTemporada().equals(temporada)) {
-				return est;
+		Estadisticas estadisticas = null;
+
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+			String query = "SELECT * FROM estadisticas WHERE Temporada = ? AND Equipo = ?";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setInt(1, temporada.getNumero());
+			ps.setString(2, equipo.getNombre());
+
+			ResultSet rs = ps.executeQuery();
+
+			if (rs.next()) {
+				int puntosTotales = rs.getInt("PuntosTotales");
+				int partidosJugados = rs.getInt("PartidasJugadas");
+				int partidosGanados = rs.getInt("PartidasGanadas");
+				int partidosPerdidos = rs.getInt("PartidasPerdidas");
+				int rondasDiferencia = rs.getInt("RondasDiferencia");
+
+				estadisticas = new Estadisticas(temporada);
+				estadisticas.setPuntosTotales(puntosTotales);
+				estadisticas.setPartidosJugados(partidosJugados);
+				estadisticas.setPartidosGanados(partidosGanados);
+				estadisticas.setPartidosPerdidos(partidosPerdidos);
+				estadisticas.setRondasDiferencia(rondasDiferencia);
 			}
+
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
 		}
-		// No se han Encontrado las Estadisticas
-		return null;
+
+		return estadisticas;
 	}
 
 	/**
 	 * Funcion para Finalizar Temporada.
 	 */
 	private void Finalizar() {
-	    Boolean otraTemporada = false;
+		Boolean otraTemporada = false;
 
-	    Temporada temporadaSeleccionada = Seleccion.getTemporadaSeleccionada();
+		Temporada temporadaSeleccionada = Seleccion.getTemporadaSeleccionada();
 
-	    // Verificar si todos los partidos han sido jugados
-	    if (!todosPartidosJugados(temporadaSeleccionada)) {
-	        JOptionPane.showMessageDialog(this, "No se pueden finalizar temporadas con partidos pendientes.",
-	                "Temporada Incompleta", JOptionPane.INFORMATION_MESSAGE);
-	        return;
-	    }
+		// Verificar si todos los partidos han sido jugados
+		if (!todosPartidosJugados(temporadaSeleccionada)) {
+			JOptionPane.showMessageDialog(this, "No se pueden finalizar temporadas con partidos pendientes.",
+					"Temporada Incompleta", JOptionPane.INFORMATION_MESSAGE);
+			return;
+		}
 
-	    if ("ACTIVA".equals(temporadaSeleccionada.getEstado())) {
-	        int opcion = JOptionPane.showConfirmDialog(this,
-	                "¿Estás seguro de que quieres finalizar la temporada? Una vez finalizada, no podrás editarla.",
-	                "Finalizar Temporada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-	        switch (opcion) {
-	            case 1:
-	                return;
-	            case JOptionPane.CLOSED_OPTION:
-	                return;
-	            case 0:
-	                try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
-	                    conn.setAutoCommit(false); // Desactivar el modo de autocommit
+		if ("ACTIVA".equals(temporadaSeleccionada.getEstado())) {
+			int opcion = JOptionPane.showConfirmDialog(this,
+					"¿Estás seguro de que quieres finalizar la temporada? Una vez finalizada, no podrás editarla.",
+					"Finalizar Temporada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			switch (opcion) {
+			case 1:
+				return;
+			case JOptionPane.CLOSED_OPTION:
+				return;
+			case 0:
+				try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
-	                    // Crear la consulta SQL para actualizar el estado de la temporada a "FINALIZADA"
-	                    String updateTemporadaQuery = "UPDATE temporada SET Estado = 'FINALIZADA' WHERE Numero = ?";
-	                    PreparedStatement psUpdateTemporada = conn.prepareStatement(updateTemporadaQuery);
-	                    psUpdateTemporada.setInt(1, temporadaSeleccionada.getNumero());
+					// Crear la consulta SQL para actualizar el estado de la temporada a
+					// "FINALIZADA"
+					String updateTemporadaQuery = "UPDATE temporada SET Estado = 'FINALIZADA' WHERE Numero = ?";
+					PreparedStatement psUpdateTemporada = conn.prepareStatement(updateTemporadaQuery);
+					psUpdateTemporada.setInt(1, temporadaSeleccionada.getNumero());
 
-	                    // Ejecutar la consulta de actualización
-	                    psUpdateTemporada.executeUpdate();
+					// Ejecutar la consulta de actualización
+					psUpdateTemporada.executeUpdate();
 
-	                    // Confirmar la transacción
-	                    conn.commit();
+					// Confirmar la transacción
+					conn.commit();
 
-	                    // Cerrar el PreparedStatement
-	                    psUpdateTemporada.close();
+					// Cerrar el PreparedStatement
+					psUpdateTemporada.close();
 
-	                    temporadaSeleccionada.setEstado("FINALIZADA");
+					temporadaSeleccionada.setEstado("FINALIZADA");
 
-	                    Logger.nuevoMovimiento(ListaMovimientos,
-	                            "Ha finalizado la Temporada " + temporadaSeleccionada.getNumero() + ".");
+					Logger.nuevoMovimiento(ListaMovimientos,
+							"Ha finalizado la Temporada " + temporadaSeleccionada.getNumero() + ".");
 
-	                    // Buscar temporada con el estado "PROXIMAMENTE"
-	                    DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
-	                    for (Temporada temporada : ListaTemporadas) {
-	                        if ("PROXIMAMENTE".equals(temporada.getEstado())) {
-	                            comboBoxModel.addElement("Temporada " + temporada.getNumero());
-	                            otraTemporada = true;
-	                        }
-	                    }
+					// Buscar temporada con el estado "PROXIMAMENTE"
+					DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
+					for (Temporada temporada : ListaTemporadas) {
+						if ("PROXIMAMENTE".equals(temporada.getEstado())) {
+							comboBoxModel.addElement("Temporada " + temporada.getNumero());
+							otraTemporada = true;
+						}
+					}
 
-	                    if (otraTemporada) {
-	                        JComboBox<String> comboBox = new JComboBox<>(comboBoxModel);
+					if (otraTemporada) {
+						JComboBox<String> comboBox = new JComboBox<>(comboBoxModel);
 
-	                        int result = JOptionPane.showOptionDialog(null, comboBox, "¿Quieres Activar otra Temporada?",
-	                                JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
+						int result = JOptionPane.showOptionDialog(null, comboBox, "¿Quieres Activar otra Temporada?",
+								JOptionPane.YES_NO_OPTION, JOptionPane.QUESTION_MESSAGE, null, null, null);
 
-	                        if (result == JOptionPane.YES_OPTION) {
-	                            // Modificar la temporada seleccionada a estado "ACTIVA"
-	                            String temporadaSeleccion = comboBox.getSelectedItem().toString();
-	                            int numeroTemporada = Integer.parseInt(temporadaSeleccion.replaceAll("[\\D]", ""));
-	                            for (Temporada temporada : ListaTemporadas) {
-	                                if (temporada.getNumero() == numeroTemporada) {
-	                                    temporada.setEstado("ACTIVA");
-	                                    break;
-	                                }
-	                            }
-	                        }
-	                    }
+						if (result == JOptionPane.YES_OPTION) {
+							// Modificar la temporada seleccionada a estado "ACTIVA"
+							String temporadaSeleccion = comboBox.getSelectedItem().toString();
+							int numeroTemporada = Integer.parseInt(temporadaSeleccion.replaceAll("[\\D]", ""));
+							for (Temporada temporada : ListaTemporadas) {
+								if (temporada.getNumero() == numeroTemporada) {
+									temporada.setEstado("ACTIVA");
+									break;
+								}
+							}
+						}
+					}
 
-	                    // Crear las variables
-	                    Inicio I = new Inicio();
-	                    // Mostrar la ventana Inicio
-	                    I.setVisible(true);
-	                    // Centrar la ventana en el centro de la pantalla
-	                    I.setLocationRelativeTo(null);
-	                    // Cerrar la ventana actual
-	                    dispose();
+					// Crear las variables
+					Inicio I = new Inicio();
+					// Mostrar la ventana Inicio
+					I.setVisible(true);
+					// Centrar la ventana en el centro de la pantalla
+					I.setLocationRelativeTo(null);
+					// Cerrar la ventana actual
+					dispose();
 
-	                } catch (SQLException e) {
-	                    e.printStackTrace();
-	                    JOptionPane.showMessageDialog(this, "Error al finalizar la temporada en la base de datos.",
-	                            "Error", JOptionPane.ERROR_MESSAGE);
-	                }
-	                return;
-	        }
-	    }
-	    JOptionPane.showMessageDialog(this, "No se puede finalizar una temporada que no está activa.",
-	            "Temporada Errónea", JOptionPane.INFORMATION_MESSAGE);
+				} catch (SQLException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(this, "Error al finalizar la temporada en la base de datos.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
+				return;
+			}
+		}
+		JOptionPane.showMessageDialog(this, "No se puede finalizar una temporada que no está activa.",
+				"Temporada Errónea", JOptionPane.INFORMATION_MESSAGE);
 	}
-
 
 	/**
 	 * Funcion para verificar que Todos los Partidos estan Jugados.
 	 *
-	 * @param temporada the temporada
-	 * @return true, if successful
+	 * @param temporada la temporada a verificar
+	 * @return true si todos los partidos están jugados, false en caso contrario
 	 */
 	private boolean todosPartidosJugados(Temporada temporada) {
-		for (Jornada jornada : temporada.getListaJornadas()) {
-			for (Partido partido : jornada.getListaPartidos()) {
-				if (!partido.getJugado()) {
-					return false;
-				}
-			}
-		}
-		return true;
+	    int totalPartidos = 0;
+	    int partidosJugados = 0;
+
+	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+	        // Contar el número total de partidos en la temporada
+	        String countTotalPartidosQuery = "SELECT COUNT(*) FROM partido WHERE Temporada = ?";
+	        PreparedStatement psCountTotalPartidos = conn.prepareStatement(countTotalPartidosQuery);
+	        psCountTotalPartidos.setInt(1, temporada.getNumero());
+
+	        ResultSet rsTotalPartidos = psCountTotalPartidos.executeQuery();
+	        if (rsTotalPartidos.next()) {
+	            totalPartidos = rsTotalPartidos.getInt(1);
+	        }
+
+	        // Contar el número de partidos jugados en la temporada
+	        String countPartidosJugadosQuery = "SELECT COUNT(*) FROM partido WHERE Temporada = ? AND Jugado = true";
+	        PreparedStatement psCountPartidosJugados = conn.prepareStatement(countPartidosJugadosQuery);
+	        psCountPartidosJugados.setInt(1, temporada.getNumero());
+
+	        ResultSet rsPartidosJugados = psCountPartidosJugados.executeQuery();
+	        if (rsPartidosJugados.next()) {
+	            partidosJugados = rsPartidosJugados.getInt(1);
+	        }
+
+	        // Comparar el número de partidos jugados con el total de partidos
+	        return partidosJugados == totalPartidos;
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        // Manejar el error apropiadamente (lanzar una excepción, mostrar un mensaje, etc.)
+	        return false;
+	    }
 	}
 
 	/**
 	 * Funcion para Inciar la Temporada.
 	 */
 	public void Iniciar() {
-	    Temporada temporadaSeleccionada = Seleccion.getTemporadaSeleccionada();
+		Temporada temporadaSeleccionada = Seleccion.getTemporadaSeleccionada();
 
-	    int opcion = JOptionPane.showConfirmDialog(this, "¿Estás seguro de que quieres iniciar la temporada?",
-	            "Iniciar Temporada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+		int opcion = JOptionPane.showConfirmDialog(this, "¿Estás seguro de que quieres iniciar la temporada?",
+				"Iniciar Temporada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
-	    if (opcion == JOptionPane.YES_OPTION) {
-	        try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
-	            conn.setAutoCommit(false); // Desactivar el modo de autocommit
+		if (opcion == JOptionPane.YES_OPTION) {
+			try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+				conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
-	            // Crear la consulta SQL para actualizar el estado de la temporada a "ACTIVA"
-	            String updateTemporadaQuery = "UPDATE temporada SET Estado = 'ACTIVA' WHERE Numero = ?";
-	            PreparedStatement psUpdateTemporada = conn.prepareStatement(updateTemporadaQuery);
-	            psUpdateTemporada.setInt(1, temporadaSeleccionada.getNumero());
+				// Crear la consulta SQL para actualizar el estado de la temporada a "ACTIVA"
+				String updateTemporadaQuery = "UPDATE temporada SET Estado = 'ACTIVA' WHERE Numero = ?";
+				PreparedStatement psUpdateTemporada = conn.prepareStatement(updateTemporadaQuery);
+				psUpdateTemporada.setInt(1, temporadaSeleccionada.getNumero());
 
-	            // Ejecutar la consulta de actualización
-	            psUpdateTemporada.executeUpdate();
+				// Ejecutar la consulta de actualización
+				psUpdateTemporada.executeUpdate();
 
-	            // Confirmar la transacción
-	            conn.commit();
+				// Confirmar la transacción
+				conn.commit();
 
-	            // Cerrar el PreparedStatement
-	            psUpdateTemporada.close();
+				// Cerrar el PreparedStatement
+				psUpdateTemporada.close();
 
-	            // Actualizar el estado localmente
-	            temporadaSeleccionada.setEstado("ACTIVA");
+				// Actualizar el estado localmente
+				temporadaSeleccionada.setEstado("ACTIVA");
 
-	            Logger.nuevoMovimiento(ListaMovimientos,
-	                    "Ha iniciado la Temporada " + temporadaSeleccionada.getNumero() + ".");
+				Logger.nuevoMovimiento(ListaMovimientos,
+						"Ha iniciado la Temporada " + temporadaSeleccionada.getNumero() + ".");
 
-	            // Crear las variables para la ventana de inicio
-	            Inicio I = new Inicio();
+				// Crear las variables para la ventana de inicio
+				Inicio I = new Inicio();
 
-	            // Mostrar la ventana de inicio
-	            I.setVisible(true);
+				// Mostrar la ventana de inicio
+				I.setVisible(true);
 
-	            // Centrar la ventana de inicio en el centro de la pantalla
-	            I.setLocationRelativeTo(null);
+				// Centrar la ventana de inicio en el centro de la pantalla
+				I.setLocationRelativeTo(null);
 
-	            // Cerrar la ventana actual
-	            dispose();
-	        } catch (SQLException e) {
-	            e.printStackTrace();
-	            JOptionPane.showMessageDialog(this, "Error al iniciar la temporada en la base de datos.",
-	                    "Error", JOptionPane.ERROR_MESSAGE);
-	        }
-	    }
+				// Cerrar la ventana actual
+				dispose();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				JOptionPane.showMessageDialog(this, "Error al iniciar la temporada en la base de datos.", "Error",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
 	}
-
 
 	/**
 	 * Funcion para Mostrar un Error.

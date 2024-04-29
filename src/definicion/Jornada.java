@@ -528,7 +528,7 @@ public class Jornada implements Serializable {
 				if (permitirEdicion(edicion)) {
 					// Crear JTextField para puntos local
 					JTextField textFieldPuntosLocal = new JTextField();
-					if (String.valueOf(partido.getPuntosLocal()).equals("-1")) {
+					if (String.valueOf(partido.getPuntosLocal()).equals("-1") || partido.getJugado().equals(false)) {
 						textFieldPuntosLocal.setText("");
 					} else {
 						textFieldPuntosLocal.setText(String.valueOf(partido.getPuntosLocal()));
@@ -548,7 +548,7 @@ public class Jornada implements Serializable {
 					// Crear JTextField para puntos
 					JTextField textFieldPuntosVisitante = new JTextField();
 
-					if (String.valueOf(partido.getPuntosVisitante()).equals("-1")) {
+					if (String.valueOf(partido.getPuntosVisitante()).equals("-1") || partido.getJugado().equals(false)) {
 						textFieldPuntosVisitante.setText("");
 					} else {
 						textFieldPuntosVisitante.setText(String.valueOf(partido.getPuntosVisitante()));

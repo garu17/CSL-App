@@ -1,12 +1,13 @@
 package definicion;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import javax.swing.ImageIcon;
 
@@ -17,9 +18,6 @@ public class Jugador extends Participante {
 
 	/** La Constante serialVersionUID generada para identificarse. */
 	private static final long serialVersionUID = -1812403768776440701L;
-
-	/** La Constante FILENAME que indica la ubicacion del fichero. */
-	private static final String FILENAME = "ficheros/jugadores.ser";
 
 	/** La Foto del Jugador. */
 	private String Foto;
@@ -60,12 +58,27 @@ public class Jugador extends Participante {
 	 * @param p   el Participante
 	 * @param foto la Foto
 	 * @param rol el Rol
+	 * @param fn la Fecha de Nacimiento
 	 */
 	// Contructor personalizado
 	public Jugador(Participante p, String foto , String rol, Fecha fn) {
 		super(p);
 		this.Foto = foto;
 		this.Rol = rol;
+		this.FechaNacimiento = fn;
+	}
+	
+	/**
+	 * Instancia para crear un nuevo Jugador personalizado.
+	 *
+	 * @param d El DNI
+	 * @param fn la Fecha de Nacimiento
+	 */
+	// Contructor personalizado
+	public Jugador(String d, Fecha fn) {
+		super(new Participante(d));
+		this.Foto = "";
+		this.Rol = "";
 		this.FechaNacimiento = fn;
 	}
 
@@ -142,40 +155,46 @@ public class Jugador extends Participante {
 	}
 
 	/**
-	 * Funcion para Guardar jugadores en el fichero.
+	 * Función para cargar jugadores desde la base de datos.
 	 *
-	 * @param lstJugadores la Lista de Jugadores
+	 * @return ArrayList de Jugadores cargados desde la base de datos.
 	 */
-	// Guarda la lista de jugadores en un archivo
-	public static void guardarJugadores(ArrayList<Jugador> lstJugadores) {
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILENAME))) {
-			oos.writeObject(lstJugadores);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Funcion para Cargar jugadores desde fichero.
-	 *
-	 * @return el ArrayList de Jugadores
-	 */
-	// Carga la lista de jugadores desde un archivo
-	@SuppressWarnings("unchecked")
 	public static ArrayList<Jugador> cargarJugadores() {
-		ArrayList<Jugador> jugadores = new ArrayList<>();
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILENAME))) {
-			jugadores = (ArrayList<Jugador>) ois.readObject();
-		} catch (FileNotFoundException e) {
-			// El archivo no existe, se creará uno nuevo cuando sea necesario
-		} catch (IOException | ClassNotFoundException e) {
-			if (!jugadores.isEmpty()) {
-				e.printStackTrace();
-			}
-		}
-		return jugadores;
+	    ArrayList<Jugador> jugadores = new ArrayList<>();
+
+	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+	         Statement stmt = conn.createStatement()) {
+
+	        // Consulta SQL para seleccionar todos los jugadores
+	        String sql = "SELECT DNI, FechaNacimiento FROM Jugador";
+	        ResultSet rs = stmt.executeQuery(sql);
+
+	        // Iterar sobre los resultados y crear objetos Jugador
+	        while (rs.next()) {
+	            String dni = rs.getString("DNI");
+	            Fecha fechaNacimiento = convertirAFecha(rs.getDate("FechaNacimiento"));
+
+	            // Crear un nuevo objeto Jugador y agregarlo a la lista
+	            Jugador jugador = new Jugador(dni, fechaNacimiento);
+	            jugadores.add(jugador);
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	        // Manejar errores de conexión o consulta SQL
+	    }
+
+	    return jugadores;
 	}
+	
+	  private static Fecha convertirAFecha(Date fechaSql) {
+	      // Convierte la fecha de SQL a un objeto Fecha
+	      Calendar calendar = Calendar.getInstance();
+	      calendar.setTime(fechaSql);
+	      int año = calendar.get(Calendar.YEAR);
+	      int mes = calendar.get(Calendar.MONTH) + 1; // Sumamos 1 porque en Calendar los meses van de 0 a 11
+	      int dia = calendar.get(Calendar.DAY_OF_MONTH);
+	      return new Fecha(dia, mes, año);
+	  }
 
 	/**
 	 * Obtiene la foto como un objeto ImageIcon.
