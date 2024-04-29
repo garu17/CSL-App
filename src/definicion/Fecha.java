@@ -2,6 +2,7 @@ package definicion;
 
 import java.io.Serializable;
 import java.util.Calendar;
+import java.util.Objects;
 
 /**
  * La Clase Fecha.
@@ -139,5 +140,20 @@ public class Fecha implements Serializable {
 		calendar.set(Calendar.MONTH, Mes - 1); // Restamos 1 porque en Calendar los meses van de 0 a 11
 		calendar.set(Calendar.YEAR, Año);
 		return calendar;
+	}
+	
+	@Override
+	public int hashCode() {
+	    return Objects.hash(Dia, Mes, Año);
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+	    if (this == o) return true;
+	    if (o == null || getClass() != o.getClass()) return false;
+	    Fecha other = (Fecha) o;
+	    return this.getDia() == other.getDia() &&
+	           this.getMes() == other.getMes() &&
+	           this.getAño() == other.getAño();
 	}
 }

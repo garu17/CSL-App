@@ -61,6 +61,19 @@ public class Participante implements Serializable {
 		this.Apellido = a;
 		this.Nacionalidad = nac;
 	}
+	
+	/**
+	 * Instancia para crear un nuevo Participante personalizado.
+	 *
+	 * @param d   el DNI
+	 */
+	// Contructor personalizado
+	public Participante(String d) {
+		this.DNI = d;
+		this.Nombre = "";
+		this.Apellido = "";
+		this.Nacionalidad = "";
+	}
 
 	/**
 	 * Funcion To string.

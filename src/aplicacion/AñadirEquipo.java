@@ -19,6 +19,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.awt.Color;
 import java.awt.Component;
@@ -237,9 +242,6 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 	/** La Lista de Jugadores del Equipo. */
 	private ArrayList<Jugador> ListaJugadores;
 
-	/** La Lista de Entrenadores Totales que hay Registrados. */
-	private ArrayList<Entrenador> ListaEntrenadores;
-
 	/** La Lista de Equipos Totales que hay Registrados. */
 	private ArrayList<Equipo> ListaEquipos;
 
@@ -317,7 +319,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 	/** El Año de la Fecha de Alta del Entrenador. */
 	Integer AñoEntrenador = 2024;
-	
+
 	/** El Dia de la Fecha de Alta del Entrenador. */
 	Integer DiaCreacion = 1;
 
@@ -326,7 +328,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 	/** El Año de la Fecha de Alta del Entrenador. */
 	Integer AñoCreacion = 2024;
-	
+
 	/** El Dia de la Fecha de Alta del Entrenador. */
 	Integer DiaNacimiento = 1;
 
@@ -344,7 +346,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 	/** La Posicion de los Jugadores por defecto. */
 	String PosicionJugador = "...";
-	
+
 	private JLabel lblEntrenadorAño_1;
 	private JLabel lblEntrenadorMes_1;
 	private JLabel lblEntrenadorDia_1;
@@ -515,27 +517,28 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		lblListaJugadoresSubir.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblListaJugadoresSubir.setBounds(157, 48, 69, 13);
 		panelListaJugadores.add(lblListaJugadoresSubir);
-		
+
 		lblEntrenadorAño_1 = new JLabel("Año");
 		lblEntrenadorAño_1.setForeground(Color.GRAY);
 		lblEntrenadorAño_1.setFont(new Font("Dialog", Font.BOLD, 10));
 		lblEntrenadorAño_1.setBounds(356, 45, 35, 13);
 		panelListaJugadores.add(lblEntrenadorAño_1);
-		
+
 		lblEntrenadorMes_1 = new JLabel("Mes");
 		lblEntrenadorMes_1.setForeground(Color.GRAY);
 		lblEntrenadorMes_1.setFont(new Font("Dialog", Font.BOLD, 10));
 		lblEntrenadorMes_1.setBounds(319, 45, 29, 13);
 		panelListaJugadores.add(lblEntrenadorMes_1);
-		
+
 		lblEntrenadorDia_1 = new JLabel("Dia");
 		lblEntrenadorDia_1.setForeground(Color.GRAY);
 		lblEntrenadorDia_1.setFont(new Font("Dialog", Font.BOLD, 10));
 		lblEntrenadorDia_1.setBounds(280, 45, 21, 13);
 		panelListaJugadores.add(lblEntrenadorDia_1);
-		
+
 		comboBoxJugadorDia = new JComboBox<Integer>(dia);
 		comboBoxJugadorDia.setBounds(279, 27, 35, 19);
+		comboBoxJugadorDia.setBackground(Color.LIGHT_GRAY);
 		comboBoxJugadorDia.addActionListener(this);
 		comboBoxJugadorDia.setUI(new BasicComboBoxUI() {
 			@Override
@@ -556,16 +559,17 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			}
 		});
 		panelListaJugadores.add(comboBoxJugadorDia);
-		
+
 		lblNacimientoBarra1 = new JLabel("/");
 		lblNacimientoBarra1.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblNacimientoBarra1.setBounds(316, 27, 12, 19);
 		panelListaJugadores.add(lblNacimientoBarra1);
-		
+
 		comboBoxJugadorMes = new JComboBox<Integer>(mes);
 		comboBoxJugadorMes.setMaximumRowCount(12);
 		comboBoxJugadorMes.setBounds(324, 27, 21, 19);
 		comboBoxJugadorMes.addActionListener(this);
+		comboBoxJugadorMes.setBackground(Color.LIGHT_GRAY);
 		comboBoxJugadorMes.setUI(new BasicComboBoxUI() {
 			@Override
 			protected JButton createArrowButton() {
@@ -585,16 +589,17 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			}
 		});
 		panelListaJugadores.add(comboBoxJugadorMes);
-				
+
 		lblNacimientoBarra2 = new JLabel("/");
 		lblNacimientoBarra2.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblNacimientoBarra2.setBounds(347, 27, 12, 19);
 		panelListaJugadores.add(lblNacimientoBarra2);
-		
+
 		inicializarAño();
 		comboBoxJugadorAño = new JComboBox<Integer>(año);
 		comboBoxJugadorAño.setBounds(353, 27, 61, 19);
 		comboBoxJugadorAño.addActionListener(this);
+		comboBoxJugadorAño.setBackground(Color.LIGHT_GRAY);
 		comboBoxJugadorAño.setUI(new BasicComboBoxUI() {
 			@Override
 			protected JButton createArrowButton() {
@@ -614,7 +619,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			}
 		});
 		panelListaJugadores.add(comboBoxJugadorAño);
-		
+
 		lblFechaNacimiento = new JLabel("Fecha de Nacimiento:");
 		lblFechaNacimiento.setFont(new Font("Tahoma", Font.BOLD, 10));
 		lblFechaNacimiento.setBounds(278, 10, 136, 13);
@@ -706,6 +711,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			}
 		});
 		comboBoxEntrenadorDia.setBounds(318, 27, 35, 19);
+		comboBoxEntrenadorDia.setBackground(Color.LIGHT_GRAY);
 		panelEntrenador.add(comboBoxEntrenadorDia);
 
 		comboBoxEntrenadorAño = new JComboBox<Integer>(año);
@@ -729,6 +735,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			}
 		});
 		comboBoxEntrenadorAño.setBounds(392, 27, 61, 19);
+		comboBoxEntrenadorAño.setBackground(Color.LIGHT_GRAY);
 		panelEntrenador.add(comboBoxEntrenadorAño);
 
 		comboBoxEntrenadorMes = new JComboBox<Integer>(mes);
@@ -753,6 +760,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			}
 		});
 		comboBoxEntrenadorMes.setBounds(363, 27, 21, 19);
+		comboBoxEntrenadorMes.setBackground(Color.LIGHT_GRAY);
 		panelEntrenador.add(comboBoxEntrenadorMes);
 
 		lblListajugadoresBarra1 = new JLabel("/");
@@ -850,6 +858,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		comboBoxCreacionAño.setBounds(113, 10, 52, 19);
 		panelCreacion.add(comboBoxCreacionAño);
 		comboBoxCreacionAño.addActionListener(this);
+		comboBoxCreacionAño.setBackground(Color.LIGHT_GRAY);
 		comboBoxCreacionAño.setUI(new BasicComboBoxUI() {
 			@Override
 			protected JButton createArrowButton() {
@@ -885,6 +894,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		panelCreacion.add(comboBoxCreacionMes);
 		comboBoxCreacionMes.addActionListener(this);
 		comboBoxCreacionMes.setMaximumRowCount(12);
+		comboBoxCreacionMes.setBackground(Color.LIGHT_GRAY);
 		comboBoxCreacionMes.setUI(new BasicComboBoxUI() {
 			@Override
 			protected JButton createArrowButton() {
@@ -913,6 +923,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		comboBoxCreacionDia.setBounds(10, 10, 35, 19);
 		panelCreacion.add(comboBoxCreacionDia);
 		comboBoxCreacionDia.addActionListener(this);
+		comboBoxCreacionDia.setBackground(Color.LIGHT_GRAY);
 		comboBoxCreacionDia.setUI(new BasicComboBoxUI() {
 			@Override
 			protected JButton createArrowButton() {
@@ -940,9 +951,9 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		lblCreacionDia.setFont(new Font("Dialog", Font.BOLD, 10));
 
 		ListaJugadores = new ArrayList<Jugador>();
-		ListaEntrenadores = Entrenador.cargarEntrenadores();
 		ListaEquipos = Equipo.cargarEquipos();
 		ListaMovimientos = Logger.cargarMovimientos();
+
 	};
 
 	/**
@@ -982,7 +993,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		} else if (e.getSource() == comboBoxCreacionAño) {
 			AñoCreacion = (Integer) comboBoxCreacionAño.getSelectedItem();
 			Fecha(2);
-		}  else if (e.getSource() == comboBoxJugadorDia) {
+		} else if (e.getSource() == comboBoxJugadorDia) {
 			DiaNacimiento = (Integer) comboBoxJugadorDia.getSelectedItem();
 		} else if (e.getSource() == comboBoxJugadorMes) {
 			MesNacimiento = (Integer) comboBoxJugadorMes.getSelectedItem();
@@ -1248,6 +1259,33 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			return;
 		}
 
+		for (Equipo equipo : ListaEquipos) {
+			Fecha fechaEntrenador = equipo.getEntrenador().getFechaAlta();
+			Fecha fechaActual = new Fecha(DiaEntrenador, MesEntrenador, AñoEntrenador);
+			Boolean igual = fechaEntrenador.getDia() == 1 && fechaEntrenador.getMes() == 1
+					&& fechaEntrenador.getAño() == 2024 && fechaActual.getDia() == 1 && fechaActual.getMes() == 1
+					&& fechaActual.getAño() == 2024;
+
+			if (igual) {
+				break;
+			}
+
+			if ((equipo.getEntrenador().getDNI().equals(DNIEntrenador) && !fechaEntrenador.equals(fechaActual))) {
+				resaltarCampo(comboBoxEntrenadorDia);
+				resaltarCampo(comboBoxEntrenadorMes);
+				resaltarCampo(comboBoxEntrenadorAño);
+				mostrarError(
+						"Este Entrenador ya ha sido registrado en otro equipo con otra Fecha de Alta distinta, se le asignará ahora el valor correspondiente.");
+				comboBoxEntrenadorDia.setSelectedItem(fechaEntrenador.getDia());
+				comboBoxEntrenadorMes.setSelectedItem(fechaEntrenador.getMes());
+				comboBoxEntrenadorAño.setSelectedItem(fechaEntrenador.getAño());
+				DiaEntrenador = fechaEntrenador.getDia();
+				MesEntrenador = fechaEntrenador.getMes();
+				AñoEntrenador = fechaEntrenador.getAño();
+				return;
+			}
+		}
+
 		if (jlm.getSize() < 5) {
 			resaltarCampo(lstJugadores);
 			mostrarError("El número mínimo de jugadores permitidos es de 5");
@@ -1327,37 +1365,155 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			jugador.setFoto(destino);
 		}
 
-		ArrayList<Jugador> TotalJugadores = Jugador.cargarJugadores();
-
-		TotalJugadores.addAll(ListaJugadores);
-
-		// Guardas la lista actualizada en el fichero
-		Jugador.guardarJugadores(TotalJugadores);
 		// Creas los nuevos datos ingresados
 		Participante nuevoParticipante = new Participante(DNIEntrenador, NombreEntrenador, ApellidoEntrenador,
 				NacionalidadEntrenador);
 
 		Fecha f = new Fecha(DiaEntrenador, MesEntrenador, AñoEntrenador);
 		Entrenador nuevoEntrenador = new Entrenador(nuevoParticipante, f);
-		// Agregas el nuevo entrenador a la lista
-		ListaEntrenadores.add(nuevoEntrenador);
-		// Guardas la lista actualizada en el fichero
-		Entrenador.guardarEntrenadores(ListaEntrenadores);
-		
-		//La fecha de Creacion
+
+
 		Fecha fc = new Fecha(DiaCreacion, MesCreacion, AñoCreacion);
 
 		// Creas un nuevo Equipo con los datos ingresados
 		Equipo nuevoEquipo = new Equipo(NombreEquipo, Escudo, Descripcion, fc, nuevoEntrenador, ListaJugadores);
 
-		// Agregas el nuevo usuario a la lista
-		ListaEquipos.add(nuevoEquipo);
+		try {
+			// Crear la conexión a la base de datos
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
-		// Guardas la lista actualizada en el fichero
-		Equipo.guardarEquipos(ListaEquipos);
+			// Crear la consulta de inserción para el equipo
+			String queryEquipo = "INSERT INTO equipo (Nombre, FechaCreacion) VALUES (?, ?)";
+			PreparedStatement psEquipo = conn.prepareStatement(queryEquipo);
+			psEquipo.setString(1, NombreEquipo);
+			psEquipo.setString(2, AñoCreacion + "-" + MesCreacion + "-" + DiaCreacion); 
+			
+			psEquipo.executeUpdate();
 
-		JOptionPane.showMessageDialog(this, "Se ha registrado tu Equipo con éxito", "Equipo Registrado",
-				JOptionPane.INFORMATION_MESSAGE);
+			// Crear la consulta SQL para verificar si ya existe un entrenador con el mismo
+			// DNI y la misma fecha de alta
+			String queryVerificarEntrenador = "SELECT COUNT(*) FROM entrenador WHERE DNI = ?";
+			PreparedStatement psVerificarEntrenador = conn.prepareStatement(queryVerificarEntrenador);
+			psVerificarEntrenador.setString(1, DNIEntrenador);
+			ResultSet rsVerificarEntrenador = psVerificarEntrenador.executeQuery();
+			rsVerificarEntrenador.next();
+			int countEntrenador = rsVerificarEntrenador.getInt(1);
+			rsVerificarEntrenador.close();
+			psVerificarEntrenador.close();
+
+			// Verificar si ya existe un entrenador con el mismo DNI y la misma fecha de
+			// alta
+			if (countEntrenador == 0) {
+				// Crear la consulta de inserción para el entrenador
+				String queryEntrenador = "INSERT INTO entrenador (DNI, FechaAlta) VALUES (?, ?)";
+				PreparedStatement psEntrenador = conn.prepareStatement(queryEntrenador);
+				psEntrenador.setString(1, DNIEntrenador);
+				psEntrenador.setString(2, AñoEntrenador + "-" + MesEntrenador + "-" + DiaEntrenador); // Asumiendo que //
+																																	// AñoEntrenador son																										// Integer
+				psEntrenador.executeUpdate();
+			}
+
+		    // Verificar si ya existe el jugador en la base de datos
+		    for (Jugador jugador : ListaJugadores) {
+		        String DNIJugador = jugador.getDNI();
+
+		        // Crear la consulta SQL para verificar si ya existe el jugador
+		        String queryVerificarJugador = "SELECT COUNT(*) FROM jugador WHERE DNI = ?";
+		        PreparedStatement psVerificarJugador = conn.prepareStatement(queryVerificarJugador);
+		        psVerificarJugador.setString(1, DNIJugador);
+		        ResultSet rsVerificarJugador = psVerificarJugador.executeQuery();
+		        rsVerificarJugador.next();
+		        int countJugador = rsVerificarJugador.getInt(1);
+		        rsVerificarJugador.close();
+		        psVerificarJugador.close();
+
+		        // Verificar si el jugador ya está registrado
+		        if (countJugador == 0) {
+		            // Si el jugador no está registrado, insertarlo en la base de datos
+		            String queryInsertarJugador = "INSERT INTO jugador (DNI, FechaNacimiento) VALUES (?, ?)";
+		            PreparedStatement psInsertarJugador = conn.prepareStatement(queryInsertarJugador);
+		            // Asignar los valores a los parámetros
+		            psInsertarJugador.setString(1, DNIJugador);
+		            psInsertarJugador.setString(2, jugador.getFechaNacimiento().getAño() + "-" + jugador.getFechaNacimiento().getMes() + "-" + jugador.getFechaNacimiento().getDia());
+		            psInsertarJugador.executeUpdate();
+		            psInsertarJugador.close();
+		        }
+		    }
+
+			// Verificar si ya existe una temporada con el número 0
+			String queryVerificarTemporada = "SELECT COUNT(*) FROM temporada WHERE Numero = 0";
+			PreparedStatement psVerificarTemporada = conn.prepareStatement(queryVerificarTemporada);
+			ResultSet rsVerificarTemporada = psVerificarTemporada.executeQuery();
+			rsVerificarTemporada.next();
+			int count = rsVerificarTemporada.getInt(1);
+			rsVerificarTemporada.close();
+			psVerificarTemporada.close();
+
+			// Si no existe una temporada con el número 0, insertarla
+			if (count == 0) {
+				String queryInsertarTemporada = "INSERT INTO temporada (Numero) VALUES (0)";
+				PreparedStatement psInsertarTemporada = conn.prepareStatement(queryInsertarTemporada);
+				psInsertarTemporada.executeUpdate();
+				psInsertarTemporada.close();
+			}
+
+			// Crear la consulta de inserción para la relación entre equipo y entrenador
+			String queryEquipoEntrenador = "INSERT INTO entrenadorcontratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
+			PreparedStatement psEquipoEntrenador = conn.prepareStatement(queryEquipoEntrenador);
+			// Asignar los valores a los parámetros
+			psEquipoEntrenador.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
+			psEquipoEntrenador.setString(2, NombreEquipo);
+			psEquipoEntrenador.setString(3, DNIEntrenador);
+			psEquipoEntrenador.setString(4, NombreEntrenador);
+			psEquipoEntrenador.setString(5, ApellidoEntrenador);
+			psEquipoEntrenador.setString(6, NacionalidadEntrenador);
+			psEquipoEntrenador.executeUpdate();
+
+			// Crear la consulta de inserción para la relación entre equipo y entrenador
+			String queryTemporadaParticipada = "INSERT INTO temporadaparticipada (Temporada, Equipo, Escudo, Descripcion) VALUES (?, ?, ?, ?)";
+			PreparedStatement psTemporadaParticipada = conn.prepareStatement(queryTemporadaParticipada);
+			// Asignar los valores a los parámetros
+			psTemporadaParticipada.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
+			psTemporadaParticipada.setString(2, NombreEquipo);
+			psTemporadaParticipada.setString(3, Escudo);
+			psTemporadaParticipada.setString(4, Descripcion);
+			psTemporadaParticipada.executeUpdate();
+
+			// Crear la consulta de inserción para los jugadores contratados
+			String queryJugadorContratado = "INSERT INTO jugadorcontratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
+			for (Jugador jugador : ListaJugadores) {
+				// Asignar los valores a los parámetros
+				psJugadorContratado.setInt(1, 0);
+				psJugadorContratado.setString(2, NombreEquipo);
+				psJugadorContratado.setString(3, jugador.getDNI());
+				psJugadorContratado.setString(4, jugador.getNombre());
+				psJugadorContratado.setString(5, jugador.getApellido());
+				psJugadorContratado.setString(6, jugador.getNacionalidad());
+				psJugadorContratado.setString(7, jugador.getFoto());
+				psJugadorContratado.setString(8, jugador.getPosicion());
+				psJugadorContratado.addBatch();
+			}
+			// Ejecutar el lote de inserciones para los jugadores contratados
+			psJugadorContratado.executeBatch();
+			psJugadorContratado.close(); // Cerrar el PreparedStatement
+
+			// Confirmar la transacción
+			conn.commit();
+
+			// Cerrar la conexión
+			conn.close();
+
+			// Mensaje de éxito
+			JOptionPane.showMessageDialog(this, "Se ha registrado tu Equipo con éxito", "Equipo Registrado",
+					JOptionPane.INFORMATION_MESSAGE);
+		} catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "Error al guardar el equipo en la base de datos.", "Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 
 		Logger.nuevoMovimiento(ListaMovimientos, "Ha creado el Equipo " + nuevoEquipo.getNombre() + ".");
 
@@ -1443,6 +1599,28 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			return;
 		}
 
+		for (Equipo equipo : ListaEquipos) {
+			
+			for (Jugador jugador : equipo.getListaJugadores()) {
+				String fechaJugadorstr = ""+jugador.getFechaNacimiento();
+				Fecha fechaJugador = jugador.getFechaNacimiento();
+				Fecha fechaActual = new Fecha(DiaNacimiento, MesNacimiento, AñoNacimiento);
+				String fechaActu = ""+fechaActual;
+
+		        // Comparar si el DNI del jugador y la fecha de nacimiento son iguales
+		        if (jugador.getDNI().equals(DNIJugador) && !fechaJugadorstr.equals(fechaActu)) {
+		            resaltarCampo(comboBoxJugadorDia);
+		            resaltarCampo(comboBoxJugadorMes);
+		            resaltarCampo(comboBoxJugadorAño);
+		            mostrarError("Este Jugador ya ha sido registrado en otro equipo con la misma Fecha de Nacimiento, se pondra la fecha Correcta a continuación.");
+		            comboBoxJugadorDia.setSelectedItem(fechaJugador.getDia());
+		            comboBoxJugadorMes.setSelectedItem(fechaJugador.getMes());
+		            comboBoxJugadorAño.setSelectedItem(fechaJugador.getAño());
+		            return;
+		        }
+			}
+		}
+
 		// Guardar la foto y el DNI del jugador en la variable que guarda todas las
 		// fotos y DNIs
 		escudosJugadores.append(FotoJugador).append(",").append(DNIJugador).append(";");
@@ -1457,10 +1635,10 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		// Crear un nuevo objeto Jugador con la información proporcionada
 		Participante nuevoParticipante = new Participante(DNIJugador, NombreJugador, ApellidoJugador,
 				NacionalidadJugador);
-		
+
 		// Crear un nuevo objeto Fecha con la información proporcionada
 		Fecha FechaN = new Fecha(DiaNacimiento, MesNacimiento, AñoNacimiento);
-		
+
 		Jugador nuevoJugador = new Jugador(nuevoParticipante, destinationPath, PosicionJugador, FechaN);
 
 		// Agregas el nuevo usuario a la lista
@@ -1561,9 +1739,13 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		textEntrenadorNombre.setBackground(Color.WHITE);
 		textEntrenadorApellido.setBackground(Color.WHITE);
 		comboBoxEntrenadorNacionalidad.setBackground(Color.WHITE);
-		comboBoxEntrenadorDia.setBackground(Color.WHITE);
-		comboBoxEntrenadorMes.setBackground(Color.WHITE);
-		comboBoxEntrenadorAño.setBackground(Color.WHITE);
+		comboBoxEntrenadorDia.setBackground(Color.LIGHT_GRAY);
+		comboBoxEntrenadorMes.setBackground(Color.LIGHT_GRAY);
+		comboBoxEntrenadorAño.setBackground(Color.LIGHT_GRAY);
+		comboBoxJugadorDia.setBackground(Color.LIGHT_GRAY);
+		comboBoxJugadorMes.setBackground(Color.LIGHT_GRAY);
+		comboBoxJugadorAño.setBackground(Color.LIGHT_GRAY);
+
 		lstJugadores.setBackground(Color.WHITE);
 		textDescripcion.setBackground(Color.WHITE);
 

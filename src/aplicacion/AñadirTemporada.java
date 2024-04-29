@@ -20,10 +20,17 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.awt.Color;
 import javax.swing.JLabel;
 import javax.swing.JList;
@@ -41,6 +48,7 @@ import definicion.Jornada;
 import definicion.Jugador;
 import definicion.Logger;
 import definicion.Participante;
+import definicion.Partido;
 import definicion.Seleccion;
 import definicion.Temporada;
 
@@ -646,14 +654,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 		// Creas una nueva Temporada con los datos ingresados
 		Temporada nuevaTemporada = new Temporada(Integer.parseInt(NumeroTemporada), fi, "PROXIMAMENTE", ListaEquipos);
 
-		/*
-		 * boolean hayTemporadaActiva = false; for (Temporada temporada :
-		 * ListaTemporadas) { if ("ACTIVA".equals(temporada.getEstado())) {
-		 * hayTemporadaActiva = true; break; } }
-		 * 
-		 * if (!hayTemporadaActiva) { nuevaTemporada.setEstado("ACTIVA"); }
-		 */
-
 		ListaJornadas = Jornada.generarJornadas(ListaEquipos, fi, nuevaTemporada);
 
 		// Asignar estadísticas a cada equipo en ListaEquipos
@@ -663,11 +663,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 		}
 
 		nuevaTemporada.setListaJornadas(ListaJornadas);
-		// Agregas el nuevo usuario a la lista
-		ListaTemporadas.add(nuevaTemporada);
-
-		// Guardas la lista actualizada en el fichero
-		Temporada.guardarTemporadas(ListaTemporadas);
 
 		JOptionPane.showMessageDialog(this, "Se ha creado tu Temporada con éxito", "Temporada Registrado",
 				JOptionPane.INFORMATION_MESSAGE);
@@ -699,26 +694,222 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 		List<Equipo> nuevaListaEquipos = crearNuevaListaEquipos(nuevaTemporada, escudosTemporadaFolder,
 				jugadoresTemporadaFolder);
 
-		// Remover la temporada anterior de la lista de temporadas
-		ListaTemporadas.remove(nuevaTemporada);
-
 		// Establecer la nueva lista de equipos como la lista de equipos de la temporada
 		// seleccionada
 		nuevaTemporada.setListaEquipos(nuevaListaEquipos);
+		
+		try {
+			// Crear la conexión a la base de datos
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
-		// Agregar la temporada actualizada a la lista de temporadas
-		ListaTemporadas.add(nuevaTemporada);
+			// Crear la consulta de inserción para el equipo
+			String queryTemporada = "INSERT INTO temporada (Numero, FechaInicio, Estado) VALUES (?, ?, ?)";
+			PreparedStatement psTemporada = conn.prepareStatement(queryTemporada);
+			psTemporada.setInt(1, nuevaTemporada.getNumero());
+			psTemporada.setString(2, nuevaTemporada.getFechaInicio().getAño() + "-"
+					+ nuevaTemporada.getFechaInicio().getMes() + "-" + nuevaTemporada.getFechaInicio().getDia());
+			psTemporada.setString(3, "PROXIMAMENTE");
 
-		// Guardar la lista actualizada en el archivo
-		Temporada.guardarTemporadas(ListaTemporadas);
+			psTemporada.executeUpdate();
+
+			for (Equipo equipo : nuevaTemporada.getListaEquipos()) {
+				if (equipo.getNombre().equals("Equipo para Descansar")) {
+					continue;
+				}
+
+				// Crear la consulta de inserción para la relación entre equipo y entrenador
+				String queryTemporadaParticipada = "INSERT INTO temporadaparticipada (Temporada, Equipo, Escudo, Descripcion) VALUES (?, ?, ?, ?)";
+				PreparedStatement psTemporadaParticipada = conn.prepareStatement(queryTemporadaParticipada);
+				// Asignar los valores a los parámetros
+				psTemporadaParticipada.setInt(1, nuevaTemporada.getNumero());
+				psTemporadaParticipada.setString(2, equipo.getNombre());
+				psTemporadaParticipada.setString(3, equipo.getEscudo());
+				psTemporadaParticipada.setString(4, equipo.getDescripcion());
+				psTemporadaParticipada.executeUpdate();
+
+				// Crear la consulta de inserción para la relación entre equipo y entrenador
+				String queryEquipoEntrenador = "INSERT INTO entrenadorcontratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
+				PreparedStatement psEquipoEntrenador = conn.prepareStatement(queryEquipoEntrenador);
+				// Asignar los valores a los parámetros
+				psEquipoEntrenador.setInt(1, nuevaTemporada.getNumero());
+				psEquipoEntrenador.setString(2, equipo.getNombre());
+				psEquipoEntrenador.setString(3, equipo.getEntrenador().getDNI());
+				psEquipoEntrenador.setString(4, equipo.getEntrenador().getNombre());
+				psEquipoEntrenador.setString(5, equipo.getEntrenador().getApellido());
+				psEquipoEntrenador.setString(6, equipo.getEntrenador().getNacionalidad());
+				psEquipoEntrenador.executeUpdate();
+				
+				for (Estadisticas estadisticas : equipo.getEstadisticasPorTemporada()) {
+				    // Crear la consulta de inserción para la relación entre equipo y estadisticas
+				    String queryEstadisticas = "INSERT INTO estadisticas (Temporada, Equipo, PuntosTotales, PartidasJugadas, PartidasGanadas, PartidasPerdidas, RondasDiferencia) VALUES (?, ?, ?, ?, ?, ?, ?)";
+				    PreparedStatement psEstadisticas = conn.prepareStatement(queryEstadisticas);
+				    
+				    psEstadisticas.setInt(1, estadisticas.getTemporada().getNumero()); // Usar el número de la temporada desde el objeto Temporada asociado a las estadísticas
+				    psEstadisticas.setString(2, equipo.getNombre()); // Obtener el nombre del equipo
+				    psEstadisticas.setInt(3, estadisticas.getPuntosTotales());
+				    psEstadisticas.setInt(4, estadisticas.getPartidosJugados());
+				    psEstadisticas.setInt(5, estadisticas.getPartidosGanados());
+				    psEstadisticas.setInt(6, estadisticas.getPartidosPerdidos());
+				    psEstadisticas.setInt(7, estadisticas.getRondasDiferencia());
+				    
+				    psEstadisticas.executeUpdate(); // Ejecutar la consulta de inserción
+				}
+
+            // Conjunto para eliminar DNIs duplicados
+            Set<String> dnisSelectedos = new HashSet<>();
+
+            // Filtrar y eliminar DNIs duplicados de la lista de jugadores
+            Iterator<Jugador> iter = equipo.getListaJugadores().iterator();
+            while (iter.hasNext()) {
+                Jugador jugador = iter.next();
+                String dni = jugador.getDNI();
+                if (dnisSelectedos.contains(dni)) {
+                    // DNI duplicado encontrado, eliminar jugador de la lista
+                    iter.remove();
+                } else {
+                    // Agregar DNI al conjunto de DNIs vistos
+                    dnisSelectedos.add(dni);
+                }
+            }
+
+				for (Jugador jugador : equipo.getListaJugadores()) {
+					// Crear la consulta de inserción para los jugadores contratados
+					String queryJugadorContratado = "INSERT INTO jugadorcontratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+					PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
+					// Asignar los valores a los parámetros
+					psJugadorContratado.setInt(1, nuevaTemporada.getNumero());
+					psJugadorContratado.setString(2, equipo.getNombre());
+					psJugadorContratado.setString(3, jugador.getDNI());
+					psJugadorContratado.setString(4, jugador.getNombre());
+					psJugadorContratado.setString(5, jugador.getApellido());
+					psJugadorContratado.setString(6, jugador.getNacionalidad());
+					psJugadorContratado.setString(7, jugador.getFoto());
+					psJugadorContratado.setString(8, jugador.getPosicion());
+
+					// Ejecutar el lote de inserciones para los jugadores contratados
+					psJugadorContratado.executeUpdate();
+				}
+			}
+
+			for (Jornada jornada : nuevaTemporada.getListaJornadas()) {
+				// Crear la consulta de inserción para la relación entre equipo y entrenador
+				String queryJornada = "INSERT INTO jornada (Temporada, Numero, Fecha) VALUES (?, ?, ?)";
+				PreparedStatement psJornada = conn.prepareStatement(queryJornada);
+				// Asignar los valores a los parámetros
+				psJornada.setInt(1, nuevaTemporada.getNumero());
+				psJornada.setInt(2, jornada.getNumero());
+				psJornada.setString(3,
+						jornada.getFecha().getAño() + "-" + jornada.getFecha().getMes() + "-" + jornada.getFecha().getDia());
+				psJornada.executeUpdate();
+
+				for (Partido partido : jornada.getListaPartidos()) {
+				    if (partido.getEquipoLocal().getNombre().equals("Equipo para Descansar") ||
+				            partido.getEquipoVisitante().getNombre().equals("Equipo para Descansar")) {
+				        continue;
+				    }
+
+				    // Conjunto para eliminar DNIs duplicados en equipos locales y visitantes
+				    Set<String> dnisSelectedosPartido = new HashSet<>();
+
+				    // Filtrar y eliminar DNIs duplicados de la lista de jugadores del equipo local
+				    Iterator<Jugador> iterLocal = partido.getEquipoLocal().getListaJugadores().iterator();
+				    while (iterLocal.hasNext()) {
+				        Jugador jugadorLocal = iterLocal.next();
+				        String dniLocal = jugadorLocal.getDNI();
+				        if (dnisSelectedosPartido.contains(dniLocal)) {
+				            // DNI duplicado encontrado, eliminar jugador de la lista del equipo local
+				            iterLocal.remove();
+				        } else {
+				            // Agregar DNI al conjunto de DNIs vistos del equipo local
+				            dnisSelectedosPartido.add(dniLocal);
+				        }
+				    }
+
+				    // Filtrar y eliminar DNIs duplicados de la lista de jugadores del equipo visitante
+				    Iterator<Jugador> iterVisitante = partido.getEquipoVisitante().getListaJugadores().iterator();
+				    while (iterVisitante.hasNext()) {
+				        Jugador jugadorVisitante = iterVisitante.next();
+				        String dniVisitante = jugadorVisitante.getDNI();
+				        if (dnisSelectedosPartido.contains(dniVisitante)) {
+				            // DNI duplicado encontrado, eliminar jugador de la lista del equipo visitante
+				            iterVisitante.remove();
+				        } else {
+				            // Agregar DNI al conjunto de DNIs vistos del equipo visitante
+				            dnisSelectedosPartido.add(dniVisitante);
+				        }
+				    }
+
+				    // Crear la consulta de inserción para el partido
+				    String queryPartido = "INSERT INTO partido (Temporada, Jornada, EquipoLocal, EquipoVisitante, PuntosLocal, PuntosVisitante, Jugado) VALUES (?, ?, ?, ?, ?, ?, ?)";
+				    PreparedStatement psPartido = conn.prepareStatement(queryPartido);
+				    psPartido.setInt(1, nuevaTemporada.getNumero());
+				    psPartido.setInt(2, jornada.getNumero());
+				    psPartido.setString(3, partido.getEquipoLocal().getNombre());
+				    psPartido.setString(4, partido.getEquipoVisitante().getNombre());
+				    psPartido.setInt(5, (partido.getPuntosLocal() == -1) ? 0 : partido.getPuntosLocal());
+				    psPartido.setInt(6, (partido.getPuntosVisitante() == -1) ? 0 : partido.getPuntosVisitante());
+				    psPartido.setBoolean(7, partido.getJugado());
+				    psPartido.executeUpdate();
+
+				    // Insertar datos de los jugadores del equipo local en el partido
+				    for (Jugador jugadorLocal : partido.getEquipoLocal().getListaJugadores()) {
+				        // Insertar datos para el equipo local
+				        insertarPartidoJugado(conn, jugadorLocal, "Local", partido, nuevaTemporada, jornada.getNumero());
+				    }
+
+				    // Insertar datos de los jugadores del equipo visitante en el partido
+				    for (Jugador jugadorVisitante : partido.getEquipoVisitante().getListaJugadores()) {
+				        // Insertar datos para el equipo visitante
+				        insertarPartidoJugado(conn, jugadorVisitante, "Visitante", partido, nuevaTemporada, jornada.getNumero());
+				    }
+				}
+
+			}
+
+			// Confirmar la transacción
+			conn.commit();
+
+			// Cerrar la conexión
+			conn.close();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			JOptionPane.showMessageDialog(this, "Error al guardar el equipo en la base de datos.", "Error",
+					JOptionPane.ERROR_MESSAGE);
+			return;
+		}
 
 		// Establecer la posición de la temporada seleccionada en 0
 		Seleccion.setTemporadaPosicion(0);
+		Seleccion.setTemporadaSeleccionada(nuevaTemporada);
 
 		// Cerrar la ventana actual
 		dispose();
 
 		return;
+	}
+	
+	private void insertarPartidoJugado(Connection conn, Jugador jugador, String tipo, Partido partido, Temporada temporada, Integer jornada) throws SQLException {
+	    // Crear la consulta de inserción para el registro del partido jugado
+	    String queryPartidoJugado = "INSERT INTO partidojugado (Jugador, EquipoJugador, EquipoRival, Jornada, Temporada) VALUES (?, ?, ?, ?, ?)";
+	    PreparedStatement psPartidoJugado = conn.prepareStatement(queryPartidoJugado);
+	    // Asignar los valores a los parámetros
+	    psPartidoJugado.setString(1, jugador.getDNI());
+	    if (tipo.equals("Local")) {
+		    psPartidoJugado.setString(2, partido.getEquipoLocal().getNombre()); // Nombre del equipo del jugador
+		    psPartidoJugado.setString(3, partido.getEquipoVisitante().getNombre()); // Nombre del equipo rival
+	    } else {
+		    psPartidoJugado.setString(2, partido.getEquipoVisitante().getNombre()); // Nombre del equipo del jugador
+		    psPartidoJugado.setString(3, partido.getEquipoLocal().getNombre()); // Nombre del equipo rival
+	    }
+	    psPartidoJugado.setInt(4, jornada); // Número de la jornada
+	    psPartidoJugado.setInt(5, temporada.getNumero()); // Número de la temporada
+
+	    // Ejecutar la consulta de inserción
+	    psPartidoJugado.executeUpdate();
+	    // Cerrar el PreparedStatement
+	    psPartidoJugado.close();
 	}
 
 	private void copiarEscudos(Temporada temporada, File destinoFolder) {
@@ -786,11 +977,14 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 				String nombreFoto = equipo.getNombre() + "-" + jugador.getDNI() + extensionFoto;
 				String nuevaRutaFoto = "ficheros/Jugadores/Temporada" + temporada.getNumero() + "/" + nombreFoto;
 				Jugador nuevoJugador = new Jugador(new Participante(jugador.getDNI(), jugador.getNombre(),
-						jugador.getApellido(), jugador.getNacionalidad()), nuevaRutaFoto, jugador.getPosicion(), jugador.getFechaNacimiento());
+						jugador.getApellido(), jugador.getNacionalidad()), nuevaRutaFoto, jugador.getPosicion(),
+						jugador.getFechaNacimiento());
 				nuevosJugadores.add(nuevoJugador);
 			}
 
-			Equipo nuevoEquipo = new Equipo(equipo.getNombre(), nuevaRutaEscudo, equipo.getDescripcion(),equipo.getFechaCreacion(), equipo.getEntrenador(), nuevosJugadores, equipo.getEstadisticasPorTemporada());
+			Equipo nuevoEquipo = new Equipo(equipo.getNombre(), nuevaRutaEscudo, equipo.getDescripcion(),
+					equipo.getFechaCreacion(), equipo.getEntrenador(), nuevosJugadores,
+					equipo.getEstadisticasPorTemporada());
 
 			nuevaListaEquipos.add(nuevoEquipo);
 		}
@@ -954,9 +1148,7 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 
-			elm2.removeElementAt(indiceSeleccionado);
 			ListaEquiposRegistrados.remove(EquipoSeleccion.getEquipoSeleccionado());
-			Equipo.guardarEquipos(ListaEquiposRegistrados);
 
 			EditarEquipo EE = new EditarEquipo();
 
@@ -981,9 +1173,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 					}
 					lstEquiposRegistrados.clearSelection();
 					lstEquipos.clearSelection();
-					ListaEquiposRegistrados.add(EquipoSeleccion.getEquipoPosicion(),
-							EquipoSeleccion.getEquipoSeleccionado());
-					Equipo.guardarEquipos(ListaEquiposRegistrados);
 
 					ListaMovimientos = Logger.cargarMovimientos();
 				}

@@ -1,12 +1,13 @@
 package definicion;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.sql.Connection;
+import java.sql.Date;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 /**
  * La Clase Entrenador.
@@ -15,9 +16,6 @@ public class Entrenador extends Participante {
 
 	/** La Constante serialVersionUID generada para identificarse. */
 	private static final long serialVersionUID = 2953596603435362053L;
-
-	/** La Constante FILENAME que indica la ubicacion del fichero. */
-	private static final String FILENAME = "ficheros/entrenadores.ser";
 
 	/** La Fecha de Alta. */
 	private Fecha FechaAlta;
@@ -53,6 +51,18 @@ public class Entrenador extends Participante {
 		super(p);
 		this.FechaAlta = f;
 	}
+	
+	/**
+	 * Instancia para crear un nuevo Jugador personalizado.
+	 *
+	 * @param d El DNI
+	 * @param fa la Fecha de Alta
+	 */
+	// Contructor personalizado
+	public Entrenador(String d, Fecha fa) {
+		super(new Participante(d));
+		this.FechaAlta = fa;
+	}
 
 	/**
 	 * Obtener la Fecha de Alta.
@@ -70,15 +80,6 @@ public class Entrenador extends Participante {
 	 */
 	public void setFechaAlta(Fecha fechaAlta) {
 		FechaAlta = fechaAlta;
-	}
-
-	/**
-	 * Obtener el FILENAME.
-	 *
-	 * @return el FILENAME
-	 */
-	public static String getFilename() {
-		return FILENAME;
 	}
 
 	/**
@@ -100,38 +101,44 @@ public class Entrenador extends Participante {
 	}
 
 	/**
-	 * Funcion para Guardar entrenadores en el fichero.
+	 * Función para cargar jugadores desde la base de datos.
 	 *
-	 * @param lstEntrenadores la Lista de Entrenadores
+	 * @return ArrayList de Jugadores cargados desde la base de datos.
 	 */
-	// Guarda la lista de entrenadores en un archivo
-	public static void guardarEntrenadores(ArrayList<Entrenador> lstEntrenadores) {
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILENAME))) {
-			oos.writeObject(lstEntrenadores);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Funcion para Cargar entrenadores desde fichero.
-	 *
-	 * @return el ArrayList de Entrenadores
-	 */
-	// Carga la lista de entrenadores desde un archivo
-	@SuppressWarnings("unchecked")
 	public static ArrayList<Entrenador> cargarEntrenadores() {
 		ArrayList<Entrenador> entrenadores = new ArrayList<>();
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILENAME))) {
-			entrenadores = (ArrayList<Entrenador>) ois.readObject();
-		} catch (FileNotFoundException e) {
-			// El archivo no existe, se creará uno nuevo cuando sea necesario
-		} catch (IOException | ClassNotFoundException e) {
-			if (!entrenadores.isEmpty()) {
-				e.printStackTrace();
+
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+				Statement stmt = conn.createStatement()) {
+
+			// Consulta SQL para seleccionar todos los jugadores
+			String sql = "SELECT DNI, FechaAlta FROM Entrenador";
+			ResultSet rs = stmt.executeQuery(sql);
+
+			// Iterar sobre los resultados y crear objetos Jugador
+			while (rs.next()) {
+				String dni = rs.getString("DNI");
+				Fecha fechaAlta = convertirAFecha(rs.getDate("FechaAlta"));
+
+				// Crear un nuevo objeto Jugador y agregarlo a la lista
+				Entrenador entrenador = new Entrenador(dni, fechaAlta);
+				entrenadores.add(entrenador);
 			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+			// Manejar errores de conexión o consulta SQL
 		}
+
 		return entrenadores;
+	}
+
+	private static Fecha convertirAFecha(Date fechaSql) {
+		// Convierte la fecha de SQL a un objeto Fecha
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTime(fechaSql);
+		int año = calendar.get(Calendar.YEAR);
+		int mes = calendar.get(Calendar.MONTH) + 1; // Sumamos 1 porque en Calendar los meses van de 0 a 11
+		int dia = calendar.get(Calendar.DAY_OF_MONTH);
+		return new Fecha(dia, mes, año);
 	}
 }

@@ -7,8 +7,10 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
 
+import definicion.Entrenador;
 import definicion.Equipo;
 import definicion.EquipoSeleccion;
+import definicion.Jugador;
 import definicion.Logger;
 import definicion.Sesion;
 import definicion.Usuario;
@@ -27,6 +29,11 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.awt.Color;
@@ -117,6 +124,12 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 
 	/** La Lista de Equipos Totales que hay Registrados. */
 	private ArrayList<Equipo> ListaEquipos;
+
+	/** La Lista de Jugadores Totales que hay Registrados. */
+	private ArrayList<Jugador> ListaJugadores;
+
+	/** La Lista de Entrenadores Totales que hay Registrados. */
+	private ArrayList<Entrenador> ListaEntrenadores;
 
 	/** Si algun Equipo ha sido Editado */
 	Boolean modificado = false;
@@ -293,7 +306,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 
 		ListaMovimientos = Logger.cargarMovimientos();
 		ListaEquipos = Equipo.cargarEquipos();
-		
+
 		// Se conecta a la base de datos
 		// crea una base de datos si todavía no existe
 		EntityManagerFactory emf = Persistence.createEntityManagerFactory("$objectdb/db/usuarios.odb");
@@ -302,11 +315,10 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 		// Utiliza una consulta JPQL para obtener todos los usuarios
 		TypedQuery<Usuario> query = em.createQuery("SELECT u FROM Usuario u", Usuario.class);
 		ListaUsuarios = query.getResultList();
-		
+
 		// Cierro la conexion con la base de datos
 		em.close();
 		emf.close();
-		
 
 		for (Logger movimiento : ListaMovimientos) {
 			mlm.addElement(movimiento);
@@ -349,118 +361,115 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 	 * Funcion par Editar Permisos de Usuarios.
 	 */
 	private void EditarPermisos() {
-	    // Obtengo el índice del elemento seleccionado
-	    int indiceSeleccionado = lstUsuarios.getSelectedIndex();
+		// Obtengo el índice del elemento seleccionado
+		int indiceSeleccionado = lstUsuarios.getSelectedIndex();
 
-	    // Compruebo si hay algún elemento seleccionado
-	    if (indiceSeleccionado != -1) {
-	        // Verifico si el usuario que se quiere eliminar es el que esta logeado
-	        if (Sesion.getUsuarioActual().equals(ulm.elementAt(indiceSeleccionado))) {
-	            // Si es el que esta logeado NO se actualiza
-	            JOptionPane.showMessageDialog(this, "No se puede actualizar el usuario con el que estás logeado",
-	                    "Usuario activo", JOptionPane.ERROR_MESSAGE);
-	        } else {
-	            // Obtengo el usuario correspondiente al índice
-	            Usuario usuario = ulm.elementAt(indiceSeleccionado);
+		// Compruebo si hay algún elemento seleccionado
+		if (indiceSeleccionado != -1) {
+			// Verifico si el usuario que se quiere eliminar es el que esta logeado
+			if (Sesion.getUsuarioActual().equals(ulm.elementAt(indiceSeleccionado))) {
+				// Si es el que esta logeado NO se actualiza
+				JOptionPane.showMessageDialog(this, "No se puede actualizar el usuario con el que estás logeado",
+						"Usuario activo", JOptionPane.ERROR_MESSAGE);
+			} else {
+				// Obtengo el usuario correspondiente al índice
+				Usuario usuario = ulm.elementAt(indiceSeleccionado);
 
-	            // Cambio el estado de la variable Privilegiado
-	            usuario.setPrivilegiado(!usuario.getPrivilegiado());
+				// Cambio el estado de la variable Privilegiado
+				usuario.setPrivilegiado(!usuario.getPrivilegiado());
 
-	            // Se conecta a la base de datos
-	            EntityManagerFactory emf = Persistence.createEntityManagerFactory("$objectdb/db/usuarios.odb");
-	            EntityManager em = emf.createEntityManager();
-	            em.getTransaction().begin();
+				// Se conecta a la base de datos
+				EntityManagerFactory emf = Persistence.createEntityManagerFactory("$objectdb/db/usuarios.odb");
+				EntityManager em = emf.createEntityManager();
+				em.getTransaction().begin();
 
-	            // Actualiza el estado de privilegios del usuario en la base de datos
-	            em.createQuery("UPDATE Usuario u SET u.Privilegiado = :privilegiado WHERE u.Nombre = :nombre")
-	                .setParameter("privilegiado", usuario.getPrivilegiado())
-	                .setParameter("nombre", usuario.getNombre())
-	                .executeUpdate();
+				// Actualiza el estado de privilegios del usuario en la base de datos
+				em.createQuery("UPDATE Usuario u SET u.Privilegiado = :privilegiado WHERE u.Nombre = :nombre")
+						.setParameter("privilegiado", usuario.getPrivilegiado()).setParameter("nombre", usuario.getNombre())
+						.executeUpdate();
 
-	            em.getTransaction().commit();
-	            em.close();
-	            emf.close();
+				em.getTransaction().commit();
+				em.close();
+				emf.close();
 
-	            // Muestro un mensaje para confirmar que se han editado los permisos
-	            // correctamente
-	            String mensaje = usuario.getNombre() + " - Permisos editados correctamente. Nuevo estado: "
-	                    + usuario.getPrivilegiado();
-	            JOptionPane.showMessageDialog(this, mensaje, "Edición de permisos exitosa",
-	                    JOptionPane.INFORMATION_MESSAGE);
-	        }
-	    } else {
-	        // Si no hay ningún elemento seleccionado
-	        JOptionPane.showMessageDialog(this, "No hay ningún usuario seleccionado", "Ningún usuario seleccionado",
-	                JOptionPane.ERROR_MESSAGE);
-	    }
+				// Muestro un mensaje para confirmar que se han editado los permisos
+				// correctamente
+				String mensaje = usuario.getNombre() + " - Permisos editados correctamente. Nuevo estado: "
+						+ usuario.getPrivilegiado();
+				JOptionPane.showMessageDialog(this, mensaje, "Edición de permisos exitosa",
+						JOptionPane.INFORMATION_MESSAGE);
+			}
+		} else {
+			// Si no hay ningún elemento seleccionado
+			JOptionPane.showMessageDialog(this, "No hay ningún usuario seleccionado", "Ningún usuario seleccionado",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
-
 
 	/**
 	 * Funcion para Eliminar Usuario.
 	 */
 	private void EliminarUsuario() {
-	    // Obtengo el índice del elemento seleccionado
-	    int indiceSeleccionado = lstUsuarios.getSelectedIndex();
+		// Obtengo el índice del elemento seleccionado
+		int indiceSeleccionado = lstUsuarios.getSelectedIndex();
 
-	    // Compruebo si hay algún elemento seleccionado
-	    if (indiceSeleccionado != -1) {
-	        if (ulm.getElementAt(indiceSeleccionado).getNombre().equals("usuario")
-	                || ulm.getElementAt(indiceSeleccionado).getNombre().equals("admin")) {
-	            JOptionPane.showMessageDialog(this,
-	                    "No se puede eliminar este Usuario debido a que esta por defecto en el sistema",
-	                    "Error de Eliminación", JOptionPane.ERROR_MESSAGE);
-	            return;
-	        }
-	        // Preguntamos al usuario si está seguro de eliminar el usuario
-	        int opcion = JOptionPane.showConfirmDialog(this, "Estas seguro de que quieres eliminar el usuario?",
-	                "Confirmacion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
-	        if (opcion == JOptionPane.YES_OPTION) {
+		// Compruebo si hay algún elemento seleccionado
+		if (indiceSeleccionado != -1) {
+			if (ulm.getElementAt(indiceSeleccionado).getNombre().equals("usuario")
+					|| ulm.getElementAt(indiceSeleccionado).getNombre().equals("admin")) {
+				JOptionPane.showMessageDialog(this,
+						"No se puede eliminar este Usuario debido a que esta por defecto en el sistema",
+						"Error de Eliminación", JOptionPane.ERROR_MESSAGE);
+				return;
+			}
+			// Preguntamos al usuario si está seguro de eliminar el usuario
+			int opcion = JOptionPane.showConfirmDialog(this, "Estas seguro de que quieres eliminar el usuario?",
+					"Confirmacion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+			if (opcion == JOptionPane.YES_OPTION) {
 
-	            Logger.nuevoMovimiento(ListaMovimientos,
-	                    "Ha eliminado el Usuario " + ulm.elementAt(indiceSeleccionado).getNombre() + ".");
+				Logger.nuevoMovimiento(ListaMovimientos,
+						"Ha eliminado el Usuario " + ulm.elementAt(indiceSeleccionado).getNombre() + ".");
 
-	            mlm.clear();
+				mlm.clear();
 
-	            for (Logger movimientos : ListaMovimientos) {
-	                mlm.addElement(movimientos);
-	            }
+				for (Logger movimientos : ListaMovimientos) {
+					mlm.addElement(movimientos);
+				}
 
-	            // Se conecta a la base de datos
-	            EntityManagerFactory emf = Persistence.createEntityManagerFactory("$objectdb/db/usuarios.odb");
-	            EntityManager em = emf.createEntityManager();
-	            em.getTransaction().begin();
+				// Se conecta a la base de datos
+				EntityManagerFactory emf = Persistence.createEntityManagerFactory("$objectdb/db/usuarios.odb");
+				EntityManager em = emf.createEntityManager();
+				em.getTransaction().begin();
 
-	            // Ejecutar consulta DELETE para eliminar el usuario
-	            Query query = em.createQuery("DELETE FROM Usuario u WHERE u.Nombre = :nombreUsuario");
-	            query.setParameter("nombreUsuario", ulm.elementAt(indiceSeleccionado).getNombre());
-	            int eliminaciones = query.executeUpdate();
+				// Ejecutar consulta DELETE para eliminar el usuario
+				Query query = em.createQuery("DELETE FROM Usuario u WHERE u.Nombre = :nombreUsuario");
+				query.setParameter("nombreUsuario", ulm.elementAt(indiceSeleccionado).getNombre());
+				int eliminaciones = query.executeUpdate();
 
-	            em.getTransaction().commit();
-	            em.close();
-	            emf.close();
+				em.getTransaction().commit();
+				em.close();
+				emf.close();
 
-	            // Verificar si se realizó la eliminación correctamente
-	            if (eliminaciones > 0) {
-	                // Elimino el usuario seleccionado del DefaultListModel
-	                ulm.removeElementAt(indiceSeleccionado);
+				// Verificar si se realizó la eliminación correctamente
+				if (eliminaciones > 0) {
+					// Elimino el usuario seleccionado del DefaultListModel
+					ulm.removeElementAt(indiceSeleccionado);
 
-	                // Muestro un mensaje para confirmar que el usuario se ha eliminado
-	                // correctamente
-	                JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente", "Eliminación de usuario exitosa",
-	                        JOptionPane.INFORMATION_MESSAGE);
-	            } else {
-	                JOptionPane.showMessageDialog(this, "No se pudo eliminar el usuario", "Error de Eliminación",
-	                        JOptionPane.ERROR_MESSAGE);
-	            }
-	        }
-	    } else {
-	        // Si no hay ningún elemento seleccionado
-	        JOptionPane.showMessageDialog(this, "No hay ningún usuario seleccionado", "Ningún usuario seleccionado",
-	                JOptionPane.ERROR_MESSAGE);
-	    }
+					// Muestro un mensaje para confirmar que el usuario se ha eliminado
+					// correctamente
+					JOptionPane.showMessageDialog(this, "Usuario eliminado correctamente", "Eliminación de usuario exitosa",
+							JOptionPane.INFORMATION_MESSAGE);
+				} else {
+					JOptionPane.showMessageDialog(this, "No se pudo eliminar el usuario", "Error de Eliminación",
+							JOptionPane.ERROR_MESSAGE);
+				}
+			}
+		} else {
+			// Si no hay ningún elemento seleccionado
+			JOptionPane.showMessageDialog(this, "No hay ningún usuario seleccionado", "Ningún usuario seleccionado",
+					JOptionPane.ERROR_MESSAGE);
+		}
 	}
-
 
 	/**
 	 * Funcion para Crear un Equipo.
@@ -517,10 +526,6 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 			// Creo las variables
 			EquipoSeleccion.setEquipoSeleccionado(elm.elementAt(indiceSeleccionado));
 
-			elm.removeElementAt(indiceSeleccionado);
-			ListaEquipos.remove(EquipoSeleccion.getEquipoSeleccionado());
-			Equipo.guardarEquipos(ListaEquipos);
-
 			EditarEquipo EE = new EditarEquipo();
 			EE.setVentanaPanelEditar(this);
 
@@ -538,11 +543,8 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 					// Establece que la ventana se quede en primer plano
 					requestFocus();
 
-					elm.add(EquipoSeleccion.getEquipoPosicion(), EquipoSeleccion.getEquipoSeleccionado());
 					lstEquipos.clearSelection();
-					ListaEquipos.add(EquipoSeleccion.getEquipoPosicion(), EquipoSeleccion.getEquipoSeleccionado());
-					Equipo.guardarEquipos(ListaEquipos);
-
+										
 					ListaMovimientos = Logger.cargarMovimientos();
 
 					mlm.clear();
@@ -569,25 +571,14 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 	 * Funcion para Eliminar un Equipo.
 	 */
 	private void EliminarEquipo() {
-		// Obtengo el índice del elemento seleccionado
 		int indiceSeleccionado = lstEquipos.getSelectedIndex();
 
-		// Compruebo si hay algún elemento seleccionado
 		if (indiceSeleccionado != -1) {
-			// Preguntamos al usuario si está seguro de eliminar el equipo
 			int opcion = JOptionPane.showConfirmDialog(this,
-					"¿Estas seguro de que quieres eliminar el equipo? El equipo no se eliminara de las temporadas pertenecientes.",
+					"¿Estás seguro de que quieres eliminar el equipo? El equipo no se eliminará de las temporadas pertenecientes.",
 					"Confirmación", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
+
 			if (opcion == JOptionPane.YES_OPTION) {
-
-				Logger.nuevoMovimiento(ListaMovimientos,
-						"Ha eliminado el Equipo " + elm.elementAt(indiceSeleccionado).getNombre() + ".");
-
-				mlm.clear();
-
-				for (Logger movimientos : ListaMovimientos) {
-					mlm.addElement(movimientos);
-				}
 
 				ListaEquipos = Equipo.cargarEquipos();
 
@@ -601,8 +592,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 							if (nombreArchivo.startsWith(elm.elementAt(indiceSeleccionado).getNombre())) {
 								boolean eliminado = archivo.delete();
 								if (!eliminado) {
-									JOptionPane.showMessageDialog(this,
-											"No se pudo eliminar el escudo del equipo eliminado",
+									JOptionPane.showMessageDialog(this, "No se pudo eliminar el escudo del equipo eliminado",
 											"Error al eliminar el escudo", JOptionPane.WARNING_MESSAGE);
 								}
 							}
@@ -610,7 +600,6 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 					}
 				}
 
-				// Elimino el usuario seleccionado del DefaultListModel y de la lista original
 				String nombreEquipoEliminado = elm.getElementAt(indiceSeleccionado).getNombre();
 
 				// Eliminar fotos de jugadores asociadas al equipo
@@ -632,19 +621,104 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 					}
 				}
 
-				elm.removeElementAt(indiceSeleccionado);
-				ListaEquipos.remove(indiceSeleccionado);
+				try {
+					Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
-				// Guardo la lista actualizada en el archivo
-				Equipo.guardarEquipos(ListaEquipos);
+					// Eliminar registros asociados en entrenadorcontratado
+					String deleteEntrenadorContratado = "DELETE FROM entrenadorcontratado WHERE Equipo = ?";
+					PreparedStatement psDeleteEntrenadorContratado = conn.prepareStatement(deleteEntrenadorContratado);
+					psDeleteEntrenadorContratado.setString(1, nombreEquipoEliminado);
+					psDeleteEntrenadorContratado.executeUpdate();
 
-				// Muestro un mensaje para confirmar que el equipo se ha eliminado correctamente
-				JOptionPane.showMessageDialog(this, "Equipo eliminado correctamente", "Eliminacion de equipo exitosa",
-						JOptionPane.INFORMATION_MESSAGE);
+					// Eliminar registros asociados en entrenadorcontratado
+					String deleteJugadorContratado = "DELETE FROM jugadorcontratado WHERE Equipo = ?";
+					PreparedStatement psDeleteJugadorContratado = conn.prepareStatement(deleteJugadorContratado);
+					psDeleteJugadorContratado.setString(1, nombreEquipoEliminado);
+					psDeleteJugadorContratado.executeUpdate();
+
+					// Eliminar registros asociados en entrenadorcontratado
+					String deleteTemporadaParticipada = "DELETE FROM temporadaparticipada WHERE Equipo = ?";
+					PreparedStatement psDeleteTemporadaParticipada = conn.prepareStatement(deleteTemporadaParticipada);
+					psDeleteTemporadaParticipada.setString(1, nombreEquipoEliminado);
+					psDeleteTemporadaParticipada.executeUpdate();
+
+					// Eliminar el equipo
+					String deleteEquipo = "DELETE FROM equipo WHERE Nombre = ?";
+					PreparedStatement psDeleteEquipo = conn.prepareStatement(deleteEquipo);
+					psDeleteEquipo.setString(1, nombreEquipoEliminado);
+					psDeleteEquipo.executeUpdate();
+
+					elm.removeElementAt(indiceSeleccionado);
+
+					if (elm.isEmpty()) {
+						// Eliminar el equipo
+						String deleteTemporada = "DELETE FROM temporada WHERE Numero = ?";
+						PreparedStatement psDeleteTemporada = conn.prepareStatement(deleteTemporada);
+						psDeleteTemporada.setInt(1, 0);
+						psDeleteTemporada.executeUpdate();
+					}
+
+					ListaJugadores = Jugador.cargarJugadores();
+
+					for (Jugador jugador : ListaJugadores) {
+
+						// Verificar si ya existe una temporada con el número 0
+						String queryVerificarJugadores = "SELECT COUNT(*) FROM jugadorcontratado jc WHERE jc.Jugador LIKE '"
+								+ jugador.getDNI() + "'";
+						PreparedStatement psVerificarJugadores = conn.prepareStatement(queryVerificarJugadores);
+						ResultSet rsVerificarJugadores = psVerificarJugadores.executeQuery();
+						rsVerificarJugadores.next();
+						int count = rsVerificarJugadores.getInt(1);
+						rsVerificarJugadores.close();
+						rsVerificarJugadores.close();
+
+						if (count == 0) {
+							// Eliminar el jugador
+							String deleteJugador = "DELETE FROM jugador WHERE DNI = ?";
+							PreparedStatement psdeleteJugador = conn.prepareStatement(deleteJugador);
+							psdeleteJugador.setString(1, jugador.getDNI());
+							psdeleteJugador.executeUpdate();
+						}
+					}
+
+					ListaEntrenadores = Entrenador.cargarEntrenadores();
+
+					for (Entrenador entrenador : ListaEntrenadores) {
+
+						// Verificar si ya existe una temporada con el número 0
+						String queryVerificarEntrenador = "SELECT COUNT(*) FROM entrenadorcontratado ec WHERE ec.Entrenador LIKE '"
+								+ entrenador.getDNI() + "'";
+						PreparedStatement psVerificarEntrenador = conn.prepareStatement(queryVerificarEntrenador);
+						ResultSet rsVerificarEntrenador = psVerificarEntrenador.executeQuery();
+						rsVerificarEntrenador.next();
+						int count = rsVerificarEntrenador.getInt(1);
+						rsVerificarEntrenador.close();
+						rsVerificarEntrenador.close();
+
+						if (count == 0) {
+							// Eliminar el jugador
+							String deleteEntrenador = "DELETE FROM entrenador WHERE DNI = ?";
+							PreparedStatement psdeleteEntrenador = conn.prepareStatement(deleteEntrenador);
+							psdeleteEntrenador.setString(1, entrenador.getDNI());
+							psdeleteEntrenador.executeUpdate();
+						}
+					}
+
+					conn.commit();
+					conn.close();
+
+					JOptionPane.showMessageDialog(this, "Equipo eliminado correctamente", "Eliminación de equipo exitosa",
+							JOptionPane.INFORMATION_MESSAGE);
+
+				} catch (SQLException e) {
+					e.printStackTrace();
+					JOptionPane.showMessageDialog(this, "Error al eliminar el equipo en la base de datos.", "Error",
+							JOptionPane.ERROR_MESSAGE);
+				}
 			}
 		} else {
-			// Si no hay ningún elemento seleccionado
-			JOptionPane.showMessageDialog(this, "No hay ningún equipo seleccionado", "Ningun equipo seleccionado",
+			JOptionPane.showMessageDialog(this, "No hay ningún equipo seleccionado", "Ningún equipo seleccionado",
 					JOptionPane.ERROR_MESSAGE);
 		}
 	}
