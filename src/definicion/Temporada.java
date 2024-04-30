@@ -255,7 +255,7 @@ public class Temporada implements Comparable<Temporada>, Serializable {
       ResultSet rsTemporadas = null;
 
       try {
-          conexion = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+          conexion = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 
           // Consulta para obtener todas las temporadas excepto la temporada 0
           String queryTemporadas = "SELECT t.Numero, t.FechaInicio, t.Estado FROM Temporada t WHERE t.Numero != 0";

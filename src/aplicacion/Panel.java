@@ -622,7 +622,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 				}
 
 				try {
-					Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+					Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 					// Eliminar registros asociados en entrenadorcontratado

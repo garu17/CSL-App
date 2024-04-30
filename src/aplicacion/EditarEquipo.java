@@ -1341,7 +1341,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 		try {
 			// Crear la conexión a la base de datos
-			Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 			
 			if (!EquipoModificado.getNombre().equals(NombreEquipo)) {

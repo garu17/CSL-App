@@ -162,7 +162,7 @@ public class Jugador extends Participante {
 	public static ArrayList<Jugador> cargarJugadores() {
 	    ArrayList<Jugador> jugadores = new ArrayList<>();
 
-	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 	         Statement stmt = conn.createStatement()) {
 
 	        // Consulta SQL para seleccionar todos los jugadores

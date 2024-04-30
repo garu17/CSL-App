@@ -1380,7 +1380,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 		try {
 			// Crear la conexión a la base de datos
-			Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 			// Crear la consulta de inserción para el equipo
