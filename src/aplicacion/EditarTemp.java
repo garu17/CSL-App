@@ -1301,6 +1301,8 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 				Logger.nuevoMovimiento(ListaMovimientos,
 						"Ha iniciado la Temporada " + temporadaSeleccionada.getNumero() + ".");
 
+				Seleccion.setTemporadaPosicion(0);
+				
 				// Crear las variables para la ventana de inicio
 				Inicio I = new Inicio();
 
