@@ -851,6 +851,21 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 			writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n"
 					+ "<?xml-stylesheet type=\"text/xsl\" href=\"ejemplo.xsl\"?>");
 			writer.println("<Temporadas>");
+			
+			writer.println("	<usuarios>");
+
+			for (Usuario usuario : ListaUsuarios) {
+
+				writer.println("		<usuario>");
+
+				writer.println("			<nombre>" + usuario.getNombre() + "</nombre>");
+				writer.println("			<password>" + usuario.getContraseña() + "</password>");
+				writer.println("			<privilegiado>" + usuario.getPrivilegiado() + "</privilegiado>");
+
+				writer.println("		</usuario>");
+			}
+
+			writer.println("</usuarios>");
 
 			for (Temporada temporada : Temporada.cargarTemporadas()) {
 
@@ -1009,37 +1024,12 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 			}
 
 			writer.println("</Temporadas>");
+			
 
 		} catch (IOException e) {
 			e.printStackTrace();
 			JOptionPane.showMessageDialog(this, "Error al exportar a XML de Temporadas", "Error",
 					JOptionPane.ERROR_MESSAGE);
-		}
-
-		// Archivo XML para todas las temporadas
-		File usuariosFile = new File(folderToSave, "usuarios.xml");
-
-		try (PrintWriter writer = new PrintWriter(usuariosFile)) {
-			// Convertir la tabla de clasificación a XML
-			writer.println("<?xml version=\"1.0\" encoding=\"UTF-8\"?>");
-			writer.println("<usuarios>");
-
-			for (Usuario usuario : ListaUsuarios) {
-
-				writer.println("	<usuario>");
-
-				writer.println("		<nombre>" + usuario.getNombre() + "</nombre>");
-				writer.println("		<password>" + usuario.getContraseña() + "</password>");
-				writer.println("		<privilegiado>" + usuario.getPrivilegiado() + "</privilegiado>");
-
-				writer.println("	</usuario>");
-			}
-
-			writer.println("</usuarios>");
-
-		} catch (IOException e) {
-			e.printStackTrace();
-			JOptionPane.showMessageDialog(this, "Error al exportar a XML de Usuarios", "Error", JOptionPane.ERROR_MESSAGE);
 		}
 
 		JOptionPane.showMessageDialog(this, "XML exportado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);

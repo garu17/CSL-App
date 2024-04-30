@@ -278,7 +278,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 	private Integer[] año;
 
 	/** Las Posiciones para la ComboBox de Posicion. */
-	private String[] posiciones = { "...", "Leader", "Support", "Lurker", "Fragger", "Awper" };
+	private String[] posiciones = { "...", "IGL", "Support", "Lurker", "Fragger", "Awper" };
 
 	/** Las Nacionalidades para la ComboBox de Nacionalidad. */
 	private String[] nacionalidades = { "...", "Afganistán", "Albania", "Alemania", "Andorra", "Angola",
@@ -1222,9 +1222,9 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		}
 
 		// Validar campos
-		if (esCampoInvalido(NombreEquipo) || NombreEquipo.length() > 10) {
+		if (esCampoInvalido(NombreEquipo) || NombreEquipo.length() > 16) {
 			resaltarCampo(textNombreEquipo);
-			mostrarError("Por favor, introduzca el Nombre del Equipo, el maximo de caracteres permitido es 9");
+			mostrarError("Por favor, introduzca el Nombre del Equipo, el maximo de caracteres permitido es 15");
 			return;
 		}
 
