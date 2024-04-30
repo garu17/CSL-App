@@ -557,8 +557,8 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
   private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
       Estadisticas estadisticas = null;
 
-      try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
-          String query = "SELECT * FROM estadisticas WHERE Temporada = ? AND Equipo = ?";
+      try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+          String query = "SELECT * FROM Estadisticas WHERE Temporada = ? AND Equipo = ?";
           PreparedStatement ps = conn.prepareStatement(query);
           ps.setInt(1, temporada.getNumero());
           ps.setString(2, equipo.getNombre());

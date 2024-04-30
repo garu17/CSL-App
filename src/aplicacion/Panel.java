@@ -622,29 +622,29 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 				}
 
 				try {
-					Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+					Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
 					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 					// Eliminar registros asociados en entrenadorcontratado
-					String deleteEntrenadorContratado = "DELETE FROM entrenadorcontratado WHERE Equipo = ?";
+					String deleteEntrenadorContratado = "DELETE FROM EntrenadorContratado WHERE Equipo = ?";
 					PreparedStatement psDeleteEntrenadorContratado = conn.prepareStatement(deleteEntrenadorContratado);
 					psDeleteEntrenadorContratado.setString(1, nombreEquipoEliminado);
 					psDeleteEntrenadorContratado.executeUpdate();
 
 					// Eliminar registros asociados en entrenadorcontratado
-					String deleteJugadorContratado = "DELETE FROM jugadorcontratado WHERE Equipo = ?";
+					String deleteJugadorContratado = "DELETE FROM JugadorContratado WHERE Equipo = ?";
 					PreparedStatement psDeleteJugadorContratado = conn.prepareStatement(deleteJugadorContratado);
 					psDeleteJugadorContratado.setString(1, nombreEquipoEliminado);
 					psDeleteJugadorContratado.executeUpdate();
 
 					// Eliminar registros asociados en entrenadorcontratado
-					String deleteTemporadaParticipada = "DELETE FROM temporadaparticipada WHERE Equipo = ?";
+					String deleteTemporadaParticipada = "DELETE FROM TemporadaParticipada WHERE Equipo = ?";
 					PreparedStatement psDeleteTemporadaParticipada = conn.prepareStatement(deleteTemporadaParticipada);
 					psDeleteTemporadaParticipada.setString(1, nombreEquipoEliminado);
 					psDeleteTemporadaParticipada.executeUpdate();
 
 					// Eliminar el equipo
-					String deleteEquipo = "DELETE FROM equipo WHERE Nombre = ?";
+					String deleteEquipo = "DELETE FROM Equipo WHERE Nombre = ?";
 					PreparedStatement psDeleteEquipo = conn.prepareStatement(deleteEquipo);
 					psDeleteEquipo.setString(1, nombreEquipoEliminado);
 					psDeleteEquipo.executeUpdate();
@@ -653,7 +653,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 
 					if (elm.isEmpty()) {
 						// Eliminar el equipo
-						String deleteTemporada = "DELETE FROM temporada WHERE Numero = ?";
+						String deleteTemporada = "DELETE FROM Temporada WHERE Numero = ?";
 						PreparedStatement psDeleteTemporada = conn.prepareStatement(deleteTemporada);
 						psDeleteTemporada.setInt(1, 0);
 						psDeleteTemporada.executeUpdate();
@@ -664,7 +664,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 					for (Jugador jugador : ListaJugadores) {
 
 						// Verificar si ya existe una temporada con el número 0
-						String queryVerificarJugadores = "SELECT COUNT(*) FROM jugadorcontratado jc WHERE jc.Jugador LIKE '"
+						String queryVerificarJugadores = "SELECT COUNT(*) FROM JugadorContratado jc WHERE jc.Jugador LIKE '"
 								+ jugador.getDNI() + "'";
 						PreparedStatement psVerificarJugadores = conn.prepareStatement(queryVerificarJugadores);
 						ResultSet rsVerificarJugadores = psVerificarJugadores.executeQuery();
@@ -675,7 +675,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 
 						if (count == 0) {
 							// Eliminar el jugador
-							String deleteJugador = "DELETE FROM jugador WHERE DNI = ?";
+							String deleteJugador = "DELETE FROM Jugador WHERE DNI = ?";
 							PreparedStatement psdeleteJugador = conn.prepareStatement(deleteJugador);
 							psdeleteJugador.setString(1, jugador.getDNI());
 							psdeleteJugador.executeUpdate();
@@ -687,7 +687,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 					for (Entrenador entrenador : ListaEntrenadores) {
 
 						// Verificar si ya existe una temporada con el número 0
-						String queryVerificarEntrenador = "SELECT COUNT(*) FROM entrenadorcontratado ec WHERE ec.Entrenador LIKE '"
+						String queryVerificarEntrenador = "SELECT COUNT(*) FROM EntrenadorContratado ec WHERE ec.Entrenador LIKE '"
 								+ entrenador.getDNI() + "'";
 						PreparedStatement psVerificarEntrenador = conn.prepareStatement(queryVerificarEntrenador);
 						ResultSet rsVerificarEntrenador = psVerificarEntrenador.executeQuery();
@@ -698,7 +698,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 
 						if (count == 0) {
 							// Eliminar el jugador
-							String deleteEntrenador = "DELETE FROM entrenador WHERE DNI = ?";
+							String deleteEntrenador = "DELETE FROM Entrenador WHERE DNI = ?";
 							PreparedStatement psdeleteEntrenador = conn.prepareStatement(deleteEntrenador);
 							psdeleteEntrenador.setString(1, entrenador.getDNI());
 							psdeleteEntrenador.executeUpdate();

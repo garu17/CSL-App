@@ -979,11 +979,11 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().add(partido.getEquipoLocal());
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().add(partido.getEquipoVisitante());
 
-					try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+					try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
 						conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 						// Crear la consulta SQL para actualizar las estadísticas
-						String updateEstadisticasQuery = "UPDATE partido SET PuntosLocal = ?, PuntosVisitante = ?, Jugado = ? WHERE Temporada = ? AND Jornada = ? AND EquipoLocal = ? AND EquipoVisitante = ?";
+						String updateEstadisticasQuery = "UPDATE Partido SET PuntosLocal = ?, PuntosVisitante = ?, Jugado = ? WHERE Temporada = ? AND Jornada = ? AND EquipoLocal = ? AND EquipoVisitante = ?";
 						PreparedStatement psUpdateEstadisticas = conn.prepareStatement(updateEstadisticasQuery);
 
 						// Asignar los valores a los parámetros de la consulta
@@ -1099,8 +1099,8 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
 		Estadisticas estadisticas = null;
 
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
-			String query = "SELECT * FROM estadisticas WHERE Temporada = ? AND Equipo = ?";
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+			String query = "SELECT * FROM Estadisticas WHERE Temporada = ? AND Equipo = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setInt(1, temporada.getNumero());
 			ps.setString(2, equipo.getNombre());
@@ -1156,12 +1156,12 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			case JOptionPane.CLOSED_OPTION:
 				return;
 			case 0:
-				try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+				try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
 					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 					// Crear la consulta SQL para actualizar el estado de la temporada a
 					// "FINALIZADA"
-					String updateTemporadaQuery = "UPDATE temporada SET Estado = 'FINALIZADA' WHERE Numero = ?";
+					String updateTemporadaQuery = "UPDATE Temporada SET Estado = 'FINALIZADA' WHERE Numero = ?";
 					PreparedStatement psUpdateTemporada = conn.prepareStatement(updateTemporadaQuery);
 					psUpdateTemporada.setInt(1, temporadaSeleccionada.getNumero());
 
@@ -1238,9 +1238,9 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	    int totalPartidos = 0;
 	    int partidosJugados = 0;
 
-	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
 	        // Contar el número total de partidos en la temporada
-	        String countTotalPartidosQuery = "SELECT COUNT(*) FROM partido WHERE Temporada = ?";
+	        String countTotalPartidosQuery = "SELECT COUNT(*) FROM Partido WHERE Temporada = ?";
 	        PreparedStatement psCountTotalPartidos = conn.prepareStatement(countTotalPartidosQuery);
 	        psCountTotalPartidos.setInt(1, temporada.getNumero());
 
@@ -1250,7 +1250,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	        }
 
 	        // Contar el número de partidos jugados en la temporada
-	        String countPartidosJugadosQuery = "SELECT COUNT(*) FROM partido WHERE Temporada = ? AND Jugado = true";
+	        String countPartidosJugadosQuery = "SELECT COUNT(*) FROM Partido WHERE Temporada = ? AND Jugado = true";
 	        PreparedStatement psCountPartidosJugados = conn.prepareStatement(countPartidosJugadosQuery);
 	        psCountPartidosJugados.setInt(1, temporada.getNumero());
 
@@ -1278,11 +1278,11 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 				"Iniciar Temporada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 		if (opcion == JOptionPane.YES_OPTION) {
-			try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+			try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
 				conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 				// Crear la consulta SQL para actualizar el estado de la temporada a "ACTIVA"
-				String updateTemporadaQuery = "UPDATE temporada SET Estado = 'ACTIVA' WHERE Numero = ?";
+				String updateTemporadaQuery = "UPDATE Temporada SET Estado = 'ACTIVA' WHERE Numero = ?";
 				PreparedStatement psUpdateTemporada = conn.prepareStatement(updateTemporadaQuery);
 				psUpdateTemporada.setInt(1, temporadaSeleccionada.getNumero());
 

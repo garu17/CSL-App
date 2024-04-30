@@ -1380,11 +1380,11 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 		try {
 			// Crear la conexión a la base de datos
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 			// Crear la consulta de inserción para el equipo
-			String queryEquipo = "INSERT INTO equipo (Nombre, FechaCreacion) VALUES (?, ?)";
+			String queryEquipo = "INSERT INTO Equipo (Nombre, FechaCreacion) VALUES (?, ?)";
 			PreparedStatement psEquipo = conn.prepareStatement(queryEquipo);
 			psEquipo.setString(1, NombreEquipo);
 			psEquipo.setString(2, AñoCreacion + "-" + MesCreacion + "-" + DiaCreacion); 
@@ -1393,7 +1393,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 			// Crear la consulta SQL para verificar si ya existe un entrenador con el mismo
 			// DNI y la misma fecha de alta
-			String queryVerificarEntrenador = "SELECT COUNT(*) FROM entrenador WHERE DNI = ?";
+			String queryVerificarEntrenador = "SELECT COUNT(*) FROM Entrenador WHERE DNI = ?";
 			PreparedStatement psVerificarEntrenador = conn.prepareStatement(queryVerificarEntrenador);
 			psVerificarEntrenador.setString(1, DNIEntrenador);
 			ResultSet rsVerificarEntrenador = psVerificarEntrenador.executeQuery();
@@ -1406,7 +1406,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			// alta
 			if (countEntrenador == 0) {
 				// Crear la consulta de inserción para el entrenador
-				String queryEntrenador = "INSERT INTO entrenador (DNI, FechaAlta) VALUES (?, ?)";
+				String queryEntrenador = "INSERT INTO Entrenador (DNI, FechaAlta) VALUES (?, ?)";
 				PreparedStatement psEntrenador = conn.prepareStatement(queryEntrenador);
 				psEntrenador.setString(1, DNIEntrenador);
 				psEntrenador.setString(2, AñoEntrenador + "-" + MesEntrenador + "-" + DiaEntrenador); // Asumiendo que //
@@ -1419,7 +1419,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		        String DNIJugador = jugador.getDNI();
 
 		        // Crear la consulta SQL para verificar si ya existe el jugador
-		        String queryVerificarJugador = "SELECT COUNT(*) FROM jugador WHERE DNI = ?";
+		        String queryVerificarJugador = "SELECT COUNT(*) FROM Jugador WHERE DNI = ?";
 		        PreparedStatement psVerificarJugador = conn.prepareStatement(queryVerificarJugador);
 		        psVerificarJugador.setString(1, DNIJugador);
 		        ResultSet rsVerificarJugador = psVerificarJugador.executeQuery();
@@ -1431,7 +1431,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		        // Verificar si el jugador ya está registrado
 		        if (countJugador == 0) {
 		            // Si el jugador no está registrado, insertarlo en la base de datos
-		            String queryInsertarJugador = "INSERT INTO jugador (DNI, FechaNacimiento) VALUES (?, ?)";
+		            String queryInsertarJugador = "INSERT INTO Jugador (DNI, FechaNacimiento) VALUES (?, ?)";
 		            PreparedStatement psInsertarJugador = conn.prepareStatement(queryInsertarJugador);
 		            // Asignar los valores a los parámetros
 		            psInsertarJugador.setString(1, DNIJugador);
@@ -1442,7 +1442,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		    }
 
 			// Verificar si ya existe una temporada con el número 0
-			String queryVerificarTemporada = "SELECT COUNT(*) FROM temporada WHERE Numero = 0";
+			String queryVerificarTemporada = "SELECT COUNT(*) FROM Temporada WHERE Numero = 0";
 			PreparedStatement psVerificarTemporada = conn.prepareStatement(queryVerificarTemporada);
 			ResultSet rsVerificarTemporada = psVerificarTemporada.executeQuery();
 			rsVerificarTemporada.next();
@@ -1452,14 +1452,14 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 
 			// Si no existe una temporada con el número 0, insertarla
 			if (count == 0) {
-				String queryInsertarTemporada = "INSERT INTO temporada (Numero) VALUES (0)";
+				String queryInsertarTemporada = "INSERT INTO Temporada (Numero) VALUES (0)";
 				PreparedStatement psInsertarTemporada = conn.prepareStatement(queryInsertarTemporada);
 				psInsertarTemporada.executeUpdate();
 				psInsertarTemporada.close();
 			}
 
 			// Crear la consulta de inserción para la relación entre equipo y entrenador
-			String queryEquipoEntrenador = "INSERT INTO entrenadorcontratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
+			String queryEquipoEntrenador = "INSERT INTO EntrenadorContratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
 			PreparedStatement psEquipoEntrenador = conn.prepareStatement(queryEquipoEntrenador);
 			// Asignar los valores a los parámetros
 			psEquipoEntrenador.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
@@ -1471,7 +1471,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			psEquipoEntrenador.executeUpdate();
 
 			// Crear la consulta de inserción para la relación entre equipo y entrenador
-			String queryTemporadaParticipada = "INSERT INTO temporadaparticipada (Temporada, Equipo, Escudo, Descripcion) VALUES (?, ?, ?, ?)";
+			String queryTemporadaParticipada = "INSERT INTO TemporadaParticipada (Temporada, Equipo, Escudo, Descripcion) VALUES (?, ?, ?, ?)";
 			PreparedStatement psTemporadaParticipada = conn.prepareStatement(queryTemporadaParticipada);
 			// Asignar los valores a los parámetros
 			psTemporadaParticipada.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
@@ -1481,7 +1481,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			psTemporadaParticipada.executeUpdate();
 
 			// Crear la consulta de inserción para los jugadores contratados
-			String queryJugadorContratado = "INSERT INTO jugadorcontratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+			String queryJugadorContratado = "INSERT INTO JugadorContratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 			PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
 			for (Jugador jugador : ListaJugadores) {
 				// Asignar los valores a los parámetros

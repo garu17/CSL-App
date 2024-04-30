@@ -1341,13 +1341,13 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 		try {
 			// Crear la conexión a la base de datos
-			Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+			Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 			
 			if (!EquipoModificado.getNombre().equals(NombreEquipo)) {
 				
 				// Crear la consulta de inserción para el equipo
-				String queryEquipo = "INSERT INTO equipo (Nombre, FechaCreacion) VALUES (?, ?)";
+				String queryEquipo = "INSERT INTO Equipo (Nombre, FechaCreacion) VALUES (?, ?)";
 				PreparedStatement psEquipo = conn.prepareStatement(queryEquipo);
 				psEquipo.setString(1, NombreEquipo);
 				psEquipo.setString(2, AñoCreacion + "-" + MesCreacion + "-" + DiaCreacion); 
@@ -1355,7 +1355,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				psEquipo.executeUpdate();
 				
 				// Crear la consulta de inserción para la relación entre equipo y entrenador
-				String queryTemporadaParticipada = "INSERT INTO temporadaparticipada (Temporada, Equipo, Escudo, Descripcion) VALUES (?, ?, ?, ?)";
+				String queryTemporadaParticipada = "INSERT INTO TemporadaParticipada (Temporada, Equipo, Escudo, Descripcion) VALUES (?, ?, ?, ?)";
 				PreparedStatement psTemporadaParticipada = conn.prepareStatement(queryTemporadaParticipada);
 				// Asignar los valores a los parámetros
 				psTemporadaParticipada.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
@@ -1365,25 +1365,25 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				psTemporadaParticipada.executeUpdate();
 				
 				// Eliminar registros asociados en entrenadorcontratado
-				String deleteEntrenadorContratado = "DELETE FROM entrenadorcontratado WHERE Equipo = ?";
+				String deleteEntrenadorContratado = "DELETE FROM EntrenadorContratado WHERE Equipo = ?";
 				PreparedStatement psDeleteEntrenadorContratado = conn.prepareStatement(deleteEntrenadorContratado);
 				psDeleteEntrenadorContratado.setString(1, EquipoModificado.getNombre());
 				psDeleteEntrenadorContratado.executeUpdate();
 
 				// Eliminar registros asociados en entrenadorcontratado
-				String deleteJugadorContratado = "DELETE FROM jugadorcontratado WHERE Equipo = ?";
+				String deleteJugadorContratado = "DELETE FROM JugadorContratado WHERE Equipo = ?";
 				PreparedStatement psDeleteJugadorContratado = conn.prepareStatement(deleteJugadorContratado);
 				psDeleteJugadorContratado.setString(1, EquipoModificado.getNombre());
 				psDeleteJugadorContratado.executeUpdate();
 
 				// Eliminar registros asociados en entrenadorcontratado
-				String deleteTemporadaParticipada = "DELETE FROM temporadaparticipada WHERE Equipo = ?";
+				String deleteTemporadaParticipada = "DELETE FROM TemporadaParticipada WHERE Equipo = ?";
 				PreparedStatement psDeleteTemporadaParticipada = conn.prepareStatement(deleteTemporadaParticipada);
 				psDeleteTemporadaParticipada.setString(1, EquipoModificado.getNombre());
 				psDeleteTemporadaParticipada.executeUpdate();
 
 				// Eliminar el equipo
-				String deleteEquipo = "DELETE FROM equipo WHERE Nombre = ?";
+				String deleteEquipo = "DELETE FROM Equipo WHERE Nombre = ?";
 				PreparedStatement psDeleteEquipo = conn.prepareStatement(deleteEquipo);
 				psDeleteEquipo.setString(1, EquipoModificado.getNombre());
 				psDeleteEquipo.executeUpdate();
@@ -1392,7 +1392,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 			else {
 
 			// Crear la consulta de actualización para el equipo
-			String queryEquipo = "UPDATE equipo SET FechaCreacion = ? WHERE Nombre = ?";
+			String queryEquipo = "UPDATE Equipo SET FechaCreacion = ? WHERE Nombre = ?";
 			PreparedStatement psEquipo = conn.prepareStatement(queryEquipo);
 			psEquipo.setString(1, AñoCreacion + "-" + MesCreacion + "-" + DiaCreacion);
 			psEquipo.setString(2, NombreEquipo);
@@ -1402,7 +1402,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 
 			// Crear la consulta de actualizacion para la relación entre equipo y temporada
-			String queryTemporadaParticipada = "UPDATE temporadaparticipada SET Escudo = ?, Descripcion = ? WHERE Temporada = ? AND Equipo = ?";
+			String queryTemporadaParticipada = "UPDATE TemporadaParticipada SET Escudo = ?, Descripcion = ? WHERE Temporada = ? AND Equipo = ?";
 			PreparedStatement psTemporadaParticipada = conn.prepareStatement(queryTemporadaParticipada);
 			// Asignar los valores a los parámetros
 			psTemporadaParticipada.setString(1, Escudo); // Asumiendo que 'temporada' es un Integer con el número de
@@ -1416,7 +1416,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 			// Crear la consulta SQL para verificar si ya existe un entrenador con el mismo
 			// DNI y la misma fecha de alta
-			String queryVerificarEntrenador = "SELECT COUNT(*) FROM entrenador WHERE DNI = ?";
+			String queryVerificarEntrenador = "SELECT COUNT(*) FROM Entrenador WHERE DNI = ?";
 			PreparedStatement psVerificarEntrenador = conn.prepareStatement(queryVerificarEntrenador);
 			psVerificarEntrenador.setString(1, DNIEntrenador);
 			ResultSet rsVerificarEntrenador = psVerificarEntrenador.executeQuery();
@@ -1428,7 +1428,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 			// Verificar si ya existe un entrenador con el mismo DNI
 			if (countEntrenador == 0) {
 				// Crear la consulta de inserción para el entrenador
-				String queryEntrenador = "INSERT INTO entrenador (DNI, FechaAlta) VALUES (?, ?)";
+				String queryEntrenador = "INSERT INTO Entrenador (DNI, FechaAlta) VALUES (?, ?)";
 				PreparedStatement psEntrenador = conn.prepareStatement(queryEntrenador);
 				psEntrenador.setString(1, DNIEntrenador);
 				psEntrenador.setString(2, AñoEntrenador + "-" + MesEntrenador + "-" + DiaEntrenador); // Asumiendo que // //
@@ -1437,7 +1437,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				psEntrenador.executeUpdate();
 
 				// Crear la consulta de inserción para la relación entre equipo y entrenador
-				String queryEquipoEntrenador = "INSERT INTO entrenadorcontratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
+				String queryEquipoEntrenador = "INSERT INTO EntrenadorContratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
 				PreparedStatement psEquipoEntrenador = conn.prepareStatement(queryEquipoEntrenador);
 				// Asignar los valores a los parámetros
 				psEquipoEntrenador.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
@@ -1449,7 +1449,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				psEquipoEntrenador.executeUpdate();
 			} else {
 				// Crear la consulta de actualización para el entrenador
-				String queryEntrenador = "UPDATE entrenador SET FechaAlta = ? WHERE DNI = ?";
+				String queryEntrenador = "UPDATE Entrenador SET FechaAlta = ? WHERE DNI = ?";
 				PreparedStatement psEntrenador = conn.prepareStatement(queryEntrenador);
 				psEntrenador.setString(1, AñoEntrenador + "-" + MesEntrenador + "-" + DiaEntrenador); // Asumiendo que
 																																	// DiaCreacion,
@@ -1459,7 +1459,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				
 			// Crear la consulta SQL para verificar si ya existe un entrenador con el mismo
 				// DNI y la misma fecha de alta
-				String queryVerificarEntrenadorContratado = "SELECT COUNT(*) FROM entrenadorcontratado WHERE Entrenador = ? AND Equipo = ? AND Temporada = ? ";
+				String queryVerificarEntrenadorContratado = "SELECT COUNT(*) FROM EntrenadorContratado WHERE Entrenador = ? AND Equipo = ? AND Temporada = ? ";
 				PreparedStatement psVerificarEntrenadorContratado = conn.prepareStatement(queryVerificarEntrenadorContratado);
 				psVerificarEntrenadorContratado.setString(1, DNIEntrenador);
 				psVerificarEntrenadorContratado.setString(2, NombreEquipo);
@@ -1473,7 +1473,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				if (countEntrenadorContratado == 0) {
 
 					// Crear la consulta de inserción para la relación entre equipo y entrenador
-					String queryEquipoEntrenador = "INSERT INTO entrenadorcontratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
+					String queryEquipoEntrenador = "INSERT INTO EntrenadorContratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
 					PreparedStatement psEquipoEntrenador = conn.prepareStatement(queryEquipoEntrenador);
 					// Asignar los valores a los parámetros
 					psEquipoEntrenador.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
@@ -1486,7 +1486,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 				} else {
 					// Crear la consulta de actualización para el entrenador
-					String queryEntrenadorContratado = "UPDATE entrenadorcontratado SET Nombre = ?, Apellido = ?, Nacionalidad = ? WHERE Entrenador = ? AND Equipo = ? AND Temporada = ?";
+					String queryEntrenadorContratado = "UPDATE EntrenadorContratado SET Nombre = ?, Apellido = ?, Nacionalidad = ? WHERE Entrenador = ? AND Equipo = ? AND Temporada = ?";
 					PreparedStatement psEntrenadorContratado = conn.prepareStatement(queryEntrenadorContratado);
 					psEntrenadorContratado.setString(1, NombreEntrenador);
 					psEntrenadorContratado.setString(2, ApellidoEntrenador);
@@ -1504,7 +1504,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 				// Crear la consulta SQL para verificar si ya existe un entrenador con el mismo
 				// DNI y la misma fecha de alta
-				String queryVerificarJugador = "SELECT COUNT(*) FROM jugador WHERE DNI = ?";
+				String queryVerificarJugador = "SELECT COUNT(*) FROM Jugador WHERE DNI = ?";
 				PreparedStatement psVerificarJugador = conn.prepareStatement(queryVerificarJugador);
 				psVerificarJugador.setString(1, jugador.getDNI());
 				ResultSet rsVerificarJugador = psVerificarJugador.executeQuery();
@@ -1516,7 +1516,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				// Verificar si ya existe un entrenador con el mismo DNI
 				if (countJugador == 0) {
 					// Crear la consulta de inserción para el entrenador
-					String queryJugador = "INSERT INTO jugador (DNI, FechaNacimiento) VALUES (?, ?)";
+					String queryJugador = "INSERT INTO Jugador (DNI, FechaNacimiento) VALUES (?, ?)";
 					PreparedStatement psJugador = conn.prepareStatement(queryJugador);
 					psJugador.setString(1, jugador.getDNI());
 					psJugador.setString(2, jugador.getFechaNacimiento().getAño() + "-"
@@ -1525,7 +1525,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 					psJugador.executeUpdate();
 
 					// Crear la consulta de inserción para la relación entre equipo y entrenador
-					String queryJugadorContratado = "INSERT INTO jugadorcontratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+					String queryJugadorContratado = "INSERT INTO JugadorContratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 					PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
 					// Asignar los valores a los parámetros
 					psJugadorContratado.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
@@ -1539,7 +1539,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 					psJugadorContratado.executeUpdate();
 				} else {
 					// Crear la consulta de inserción para el entrenador
-					String queryJugador = "UPDATE jugador SET FechaNacimiento = ? WHERE DNI = ? ";
+					String queryJugador = "UPDATE Jugador SET FechaNacimiento = ? WHERE DNI = ? ";
 					PreparedStatement psJugador = conn.prepareStatement(queryJugador);
 					psJugador.setString(1, jugador.getFechaNacimiento().getAño() + "-"
 							+ jugador.getFechaNacimiento().getMes() + "-" + jugador.getFechaNacimiento().getDia());
@@ -1549,7 +1549,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 					// Crear la consulta SQL para verificar si ya existe un entrenador con el mismo
 					// DNI y la misma fecha de alta
-					String queryVerificarJugadorContratado = "SELECT COUNT(*) FROM jugadorcontratado WHERE Jugador = ? AND Equipo = ? AND Temporada = ? ";
+					String queryVerificarJugadorContratado = "SELECT COUNT(*) FROM JugadorContratado WHERE Jugador = ? AND Equipo = ? AND Temporada = ? ";
 					PreparedStatement psVerificarJugadorContratado = conn.prepareStatement(queryVerificarJugadorContratado);
 					psVerificarJugadorContratado.setString(1, jugador.getDNI());
 					psVerificarJugadorContratado.setString(2, NombreEquipo);
@@ -1563,7 +1563,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 					if (countJugadorContratado == 0) {
 
 						// Crear la consulta de inserción para la relación entre equipo y entrenador
-						String queryJugadorContratado = "INSERT INTO jugadorcontratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+						String queryJugadorContratado = "INSERT INTO JugadorContratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 						PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
 						// Asignar los valores a los parámetros
 						psJugadorContratado.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de
@@ -1579,7 +1579,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 					} else {
 						// Crear la consulta de inserción para la relación entre equipo y entrenador
-						String queryJugadorContratado = "UPDATE jugadorcontratado SET Nombre = ?, Apellido = ?, Nacionalidad = ?, Foto = ?, Rol = ? WHERE Jugador = ? AND Equipo = ? AND Temporada = ?";
+						String queryJugadorContratado = "UPDATE JugadorContratado SET Nombre = ?, Apellido = ?, Nacionalidad = ?, Foto = ?, Rol = ? WHERE Jugador = ? AND Equipo = ? AND Temporada = ?";
 						PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
 						// Asignar los valores a los parámetros
 						psJugadorContratado.setString(1, jugador.getNombre());

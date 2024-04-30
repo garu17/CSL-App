@@ -312,13 +312,13 @@ public class Equipo implements Serializable {
 		ResultSet rs = null;
 
 		try {
-			conexion = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+			conexion = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
 			st = conexion.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			rs = st.executeQuery("SELECT DISTINCT e.Nombre, e.FechaCreacion, tp.Escudo, tp.Descripcion, "
 					+ "ec.Entrenador, ec.Nombre AS NombreEntrenador, ec.Apellido, ec.Nacionalidad, en.FechaAlta "
-					+ "FROM equipo e " + "JOIN entrenadorcontratado ec ON e.Nombre = ec.Equipo "
-					+ "JOIN entrenador en ON ec.Entrenador = en.DNI "
-					+ "JOIN temporadaparticipada tp ON e.Nombre = tp.Equipo " + "WHERE tp.Temporada = 0");
+					+ "FROM Equipo e " + "JOIN EntrenadorContratado ec ON e.Nombre = ec.Equipo "
+					+ "JOIN Entrenador en ON ec.Entrenador = en.DNI "
+					+ "JOIN TemporadaParticipada tp ON e.Nombre = tp.Equipo " + "WHERE tp.Temporada = 0");
 
 			while (rs.next()) {
 				String nombreEquipo = rs.getString("Nombre");
@@ -346,7 +346,7 @@ public class Equipo implements Serializable {
 				Statement stJugadores = conexion.createStatement();
 				ResultSet rsJugadores = stJugadores.executeQuery(
 						"SELECT j.DNI, jc.Nombre, jc.Apellido, jc.Nacionalidad, jc.Foto, jc.Rol, j.FechaNacimiento "
-								+ "FROM jugadorcontratado jc " + "JOIN jugador j ON jc.Jugador = j.DNI " + "WHERE jc.Equipo = '"
+								+ "FROM JugadorContratado jc " + "JOIN Jugador j ON jc.Jugador = j.DNI " + "WHERE jc.Equipo = '"
 								+ nombreEquipo + "' AND jc.Temporada = 0");
 
 				while (rsJugadores.next()) {
@@ -466,11 +466,11 @@ public class Equipo implements Serializable {
 			}
 		}
 
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 			// Crear la consulta SQL para actualizar las estadísticas
-			String updateEstadisticasQuery = "UPDATE estadisticas SET PuntosTotales = ?, PartidasJugadas = ?, PartidasGanadas = ?, PartidasPerdidas = ?, RondasDiferencia = ? WHERE Temporada = ? AND Equipo = ?";
+			String updateEstadisticasQuery = "UPDATE Estadisticas SET PuntosTotales = ?, PartidasJugadas = ?, PartidasGanadas = ?, PartidasPerdidas = ?, RondasDiferencia = ? WHERE Temporada = ? AND Equipo = ?";
 			PreparedStatement psUpdateEstadisticas = conn.prepareStatement(updateEstadisticasQuery);
 
 			// Asignar los valores a los parámetros de la consulta
@@ -505,8 +505,8 @@ public class Equipo implements Serializable {
 	private Estadisticas obtenerEstadisticasPorTemporada(Temporada temporada, String equipo) {
 		Estadisticas estadisticas = null;
 
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
-			String query = "SELECT * FROM estadisticas WHERE Temporada = ? AND Equipo = ?";
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+			String query = "SELECT * FROM Estadisticas WHERE Temporada = ? AND Equipo = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setInt(1, temporada.getNumero());
 			ps.setString(2, equipo); // Obtener el nombre del equipo actual
@@ -545,12 +545,12 @@ public class Equipo implements Serializable {
 	}
 
 	public static void limpiarEstadisticasEquipo(Temporada temporada, String nombreEquipo) {
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "")) {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 			// Crear la consulta SQL para limpiar las estadísticas del equipo para la
 			// temporada
-			String limpiarEstadisticasQuery = "UPDATE estadisticas SET PuntosTotales = 0, PartidasJugadas = 0, PartidasGanadas = 0, PartidasPerdidas = 0, RondasDiferencia = 0 WHERE Temporada = ? AND Equipo = ?";
+			String limpiarEstadisticasQuery = "UPDATE Estadisticas SET PuntosTotales = 0, PartidasJugadas = 0, PartidasGanadas = 0, PartidasPerdidas = 0, RondasDiferencia = 0 WHERE Temporada = ? AND Equipo = ?";
 			PreparedStatement psLimpiarEstadisticas = conn.prepareStatement(limpiarEstadisticasQuery);
 
 			// Asignar los valores a los parámetros de la consulta

@@ -558,41 +558,41 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 
 				try {
 					// Crear la conexión a la base de datos
-					Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+					Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
 					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 					// Eliminar registros de temporadaparticipada para la temporada
-					String deleteTemporadaParticipadaQuery = "DELETE FROM temporadaparticipada WHERE Temporada = ?";
+					String deleteTemporadaParticipadaQuery = "DELETE FROM TemporadaParticipada WHERE Temporada = ?";
 					PreparedStatement psDeleteTemporadaParticipada = conn.prepareStatement(deleteTemporadaParticipadaQuery);
 					psDeleteTemporadaParticipada.setInt(1, Temporada.getNumero());
 					psDeleteTemporadaParticipada.executeUpdate();
 
 					// Eliminar registros de entrenadorcontratado para la temporada
-					String deleteEntrenadorContratadoQuery = "DELETE FROM entrenadorcontratado WHERE Temporada = ?";
+					String deleteEntrenadorContratadoQuery = "DELETE FROM EntrenadorContratado WHERE Temporada = ?";
 					PreparedStatement psDeleteEntrenadorContratado = conn.prepareStatement(deleteEntrenadorContratadoQuery);
 					psDeleteEntrenadorContratado.setInt(1, Temporada.getNumero());
 					psDeleteEntrenadorContratado.executeUpdate();
 
 					// Eliminar registros de estadisticas para la temporada
-					String deleteEstadisticasQuery = "DELETE FROM estadisticas WHERE Temporada = ?";
+					String deleteEstadisticasQuery = "DELETE FROM Estadisticas WHERE Temporada = ?";
 					PreparedStatement psDeleteEstadisticas = conn.prepareStatement(deleteEstadisticasQuery);
 					psDeleteEstadisticas.setInt(1, Temporada.getNumero());
 					psDeleteEstadisticas.executeUpdate();
 
 					// Eliminar registros de jugadorcontratado para la temporada
-					String deleteJugadorContratadoQuery = "DELETE FROM jugadorcontratado WHERE Temporada = ?";
+					String deleteJugadorContratadoQuery = "DELETE FROM JugadorContratado WHERE Temporada = ?";
 					PreparedStatement psDeleteJugadorContratado = conn.prepareStatement(deleteJugadorContratadoQuery);
 					psDeleteJugadorContratado.setInt(1, Temporada.getNumero());
 					psDeleteJugadorContratado.executeUpdate();
 
 					// Eliminar registros de jornada para la temporada
-					String deleteJornadaQuery = "DELETE FROM jornada WHERE Temporada = ?";
+					String deleteJornadaQuery = "DELETE FROM Jornada WHERE Temporada = ?";
 					PreparedStatement psDeleteJornada = conn.prepareStatement(deleteJornadaQuery);
 					psDeleteJornada.setInt(1, Temporada.getNumero());
 					psDeleteJornada.executeUpdate();
 
 					// Eliminar temporadas anteriores con el mismo número
-					String deleteTemporadaQuery = "DELETE FROM temporada WHERE Numero = ?";
+					String deleteTemporadaQuery = "DELETE FROM Temporada WHERE Numero = ?";
 					PreparedStatement psDeleteTemporada = conn.prepareStatement(deleteTemporadaQuery);
 					psDeleteTemporada.setInt(1, Temporada.getNumero());
 					psDeleteTemporada.executeUpdate();

@@ -255,10 +255,10 @@ public class Temporada implements Comparable<Temporada>, Serializable {
       ResultSet rsTemporadas = null;
 
       try {
-          conexion = DriverManager.getConnection("jdbc:mysql://localhost/csleague", "root", "");
+          conexion = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
 
           // Consulta para obtener todas las temporadas excepto la temporada 0
-          String queryTemporadas = "SELECT t.Numero, t.FechaInicio, t.Estado FROM temporada t WHERE t.Numero != 0";
+          String queryTemporadas = "SELECT t.Numero, t.FechaInicio, t.Estado FROM Temporada t WHERE t.Numero != 0";
           psTemporadas = conexion.prepareStatement(queryTemporadas);
           rsTemporadas = psTemporadas.executeQuery();
 
@@ -298,10 +298,10 @@ public class Temporada implements Comparable<Temporada>, Serializable {
       List<Equipo> equipos = new ArrayList<>();
       String queryEquipos = "SELECT DISTINCT e.Nombre, e.FechaCreacion, tp.Escudo, tp.Descripcion, " +
               "ec.Entrenador, ec.Nombre AS NombreEntrenador, ec.Apellido, ec.Nacionalidad, en.FechaAlta " +
-              "FROM equipo e " +
-              "JOIN entrenadorcontratado ec ON e.Nombre = ec.Equipo " +
-              "JOIN entrenador en ON ec.Entrenador = en.DNI " +
-              "JOIN temporadaparticipada tp ON e.Nombre = tp.Equipo " +
+              "FROM Equipo e " +
+              "JOIN EntrenadorContratado ec ON e.Nombre = ec.Equipo " +
+              "JOIN Entrenador en ON ec.Entrenador = en.DNI " +
+              "JOIN TemporadaParticipada tp ON e.Nombre = tp.Equipo " +
               "WHERE tp.Temporada = ?";
 
       PreparedStatement psEquipos = conexion.prepareStatement(queryEquipos);
@@ -344,8 +344,8 @@ public class Temporada implements Comparable<Temporada>, Serializable {
   private static List<Jugador> cargarJugadoresPorEquipo(Connection conexion, String nombreEquipo, int numeroTemporada) throws SQLException {
       List<Jugador> jugadores = new ArrayList<>();
       String queryJugadores = "SELECT j.DNI, jc.Nombre, jc.Apellido, jc.Nacionalidad, jc.Foto, jc.Rol, j.FechaNacimiento " +
-              "FROM jugadorcontratado jc " +
-              "JOIN jugador j ON jc.Jugador = j.DNI " +
+              "FROM JugadorContratado jc " +
+              "JOIN Jugador j ON jc.Jugador = j.DNI " +
               "WHERE jc.Equipo = ? AND jc.Temporada = ?";
 
       PreparedStatement psJugadores = conexion.prepareStatement(queryJugadores);
@@ -378,7 +378,7 @@ public class Temporada implements Comparable<Temporada>, Serializable {
   
   private static List<Jornada> cargarJornadasPorTemporada(Connection conexion, Temporada Temporada) throws SQLException {
      List<Jornada> jornadas = new ArrayList<>();
-     String queryJornadas = "SELECT Temporada, Numero, Fecha FROM jornada WHERE Temporada = ?";
+     String queryJornadas = "SELECT Temporada, Numero, Fecha FROM Jornada WHERE Temporada = ?";
 
      PreparedStatement psJornadas = conexion.prepareStatement(queryJornadas);
      psJornadas.setInt(1, Temporada.getNumero());
@@ -407,7 +407,7 @@ public class Temporada implements Comparable<Temporada>, Serializable {
   
   private static List<Partido> cargarPartidosPorTemporada(Connection conexion, int numeroJornada, Temporada Temporada) throws SQLException {
      List<Partido> partidos = new ArrayList<>();
-     String queryPartidos = "SELECT Temporada, Jornada, EquipoLocal, EquipoVisitante, PuntosLocal, PuntosVisitante, Jugado FROM partido WHERE Temporada = ? AND Jornada = ?";
+     String queryPartidos = "SELECT Temporada, Jornada, EquipoLocal, EquipoVisitante, PuntosLocal, PuntosVisitante, Jugado FROM Partido WHERE Temporada = ? AND Jornada = ?";
 
      PreparedStatement psPartidos = conexion.prepareStatement(queryPartidos);
      psPartidos.setInt(1, Temporada.getNumero());
@@ -440,10 +440,10 @@ public class Temporada implements Comparable<Temporada>, Serializable {
 	    Equipo equipo = null;
 	    String queryEquipo = "SELECT e.Nombre, e.FechaCreacion, tp.Escudo, tp.Descripcion, " +
 	            "ec.Entrenador, ec.Nombre AS NombreEntrenador, ec.Apellido, ec.Nacionalidad, en.FechaAlta " +
-	            "FROM equipo e " +
-	            "JOIN entrenadorcontratado ec ON e.Nombre = ec.Equipo " +
-	            "JOIN entrenador en ON ec.Entrenador = en.DNI " +
-	            "JOIN temporadaparticipada tp ON e.Nombre = tp.Equipo " +
+	            "FROM Equipo e " +
+	            "JOIN EntrenadorContratado ec ON e.Nombre = ec.Equipo " +
+	            "JOIN Entrenador en ON ec.Entrenador = en.DNI " +
+	            "JOIN TemporadaParticipada tp ON e.Nombre = tp.Equipo " +
 	            "WHERE e.Nombre = ? AND tp.Temporada = ?";
 
 	    PreparedStatement psEquipo = conexion.prepareStatement(queryEquipo);
