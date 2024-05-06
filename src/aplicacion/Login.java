@@ -19,7 +19,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JTextField;
@@ -86,9 +85,6 @@ public class Login extends JFrame implements MouseListener, ActionListener, Focu
 
 	/** La Lista de Usuarios Totales que hay Registrados. */
 	public List<Usuario> listaUsuarios;
-
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -275,8 +271,6 @@ public class Login extends JFrame implements MouseListener, ActionListener, Focu
 		em.close();
 		emf.close();
 
-		ListaMovimientos = Logger.cargarMovimientos();
-
 	}
 
 	/**
@@ -397,7 +391,7 @@ public class Login extends JFrame implements MouseListener, ActionListener, Focu
 					// Se guarda el usuario con el que se ha iniciado sesion
 					Sesion.setUsuarioActual(usuario);
 					
-					Logger.nuevoMovimiento(ListaMovimientos, "Ha iniciado sesión.");
+					Logger.nuevoMovimiento("Ha iniciado sesión.");
 
 					// Cierro la ventana Login
 					dispose();

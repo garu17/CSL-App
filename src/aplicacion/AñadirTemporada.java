@@ -173,9 +173,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 	/** La Lista de Equipos Totales que hay Registrados. */
 	private ArrayList<Equipo> ListaEquiposRegistrados;
 
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
-
 	/** La Clase Inicio. */
 	Inicio Inicio;
 
@@ -491,7 +488,7 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 		ListaEquipos = new ArrayList<>(); // Agrega esta línea para inicializar ListaEquipos
 		ListaJornadas = new ArrayList<>(); // Agrega esta línea para inicializar ListaEquipos
 
-		ListaEquiposRegistrados = Equipo.cargarEquipos();
+		ListaEquiposRegistrados = Equipo.cargarEquipos(0);
 
 		for (Equipo equipo : ListaEquiposRegistrados) {
 			if (!equipo.getNombre().equalsIgnoreCase("Equipo para Descansar")) {
@@ -500,8 +497,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 		}
 
 		EquipoSeleccion.setGuardado(false);
-
-		ListaMovimientos = Logger.cargarMovimientos();
 	}
 
 	/**
@@ -669,7 +664,7 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 
 		Inicio.añadirTemporada(nuevaTemporada);
 
-		Logger.nuevoMovimiento(ListaMovimientos, "Ha creado la Temporada " + nuevaTemporada.getNumero() + ".");
+		Logger.nuevoMovimiento("Ha creado la Temporada " + nuevaTemporada.getNumero() + ".");
 
 		File EscudosTemporada = new File("ficheros/Escudos/");
 		File JugadoresTemporada = new File("ficheros/Jugadores/");
@@ -1117,8 +1112,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 
 				// Establece que la ventana se quede en primer plano
 				requestFocus();
-
-				ListaMovimientos = Logger.cargarMovimientos();
 			}
 		});
 		// Muestro la ventana Registro
@@ -1148,8 +1141,6 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 
-			ListaEquiposRegistrados.remove(EquipoSeleccion.getEquipoSeleccionado());
-
 			EditarEquipo EE = new EditarEquipo();
 
 			setEnabled(false);
@@ -1166,15 +1157,12 @@ public class AñadirTemporada extends JFrame implements ActionListener, ListSele
 					// Establece que la ventana se quede en primer plano
 					requestFocus();
 
-					elm2.add(EquipoSeleccion.getEquipoPosicion(), EquipoSeleccion.getEquipoSeleccionado());
 					if (elm.contains(EquipoSeleccion.getEquipoSeleccionado()) && EquipoSeleccion.getGuardado()) {
 						elm.removeElement(EquipoSeleccion.getEquipoSeleccionado());
 						EquipoSeleccion.setGuardado(false);
 					}
 					lstEquiposRegistrados.clearSelection();
 					lstEquipos.clearSelection();
-
-					ListaMovimientos = Logger.cargarMovimientos();
 				}
 			});
 			// Muestro la ventana Registro

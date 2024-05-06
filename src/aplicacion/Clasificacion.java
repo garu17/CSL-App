@@ -11,7 +11,6 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -102,9 +101,6 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 
 	/** El Boton de Exportar PDF. */
 	private JButton btnExportarPDF;
-
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -276,11 +272,11 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 		ctm = new DefaultTableModel();
 		ctm.addColumn("Posición");
 		ctm.addColumn("Equipo");
-		ctm.addColumn("Puntos Totales");
-		ctm.addColumn("Partidas Jugadas");
-		ctm.addColumn("Partidas Ganadas");
-		ctm.addColumn("Partidas Perdidas");
-		ctm.addColumn("Rondas Diferencia");
+		ctm.addColumn("P.Totales");
+		ctm.addColumn("P.Jugadas");
+		ctm.addColumn("P.Ganadas");
+		ctm.addColumn("P.Perdidas");
+		ctm.addColumn("R.Diferencia");
 
 		tableClasificacion = new JTable();
 		tableClasificacion.setBorder(new LineBorder(new Color(0, 0, 0), 2));
@@ -312,8 +308,6 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 			btnEditarTemp.setVisible(false);
 			btnPanel.setBounds(864, 22, 140, 45);
 		}
-
-		ListaMovimientos = Logger.cargarMovimientos();
 
 		// Crear una instancia de DefaultTableCellRenderer
 		DefaultTableCellRenderer centerRenderer = new DefaultTableCellRenderer();
@@ -412,7 +406,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 			JOptionPane.showMessageDialog(this, (String) "Se ha cerrado sesión. Volviendo a Login.",
 					"Cierre de sesión correcto", JOptionPane.INFORMATION_MESSAGE);
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 			// Creo las variables
 			Login L = new Login();
@@ -495,7 +489,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 	/**
 	 * Funcion para Llenar la Tabla.
 	 */
-   private void llenarTabla() {
+	private void llenarTabla() {
 		// Ordenar la lista de equipos por estadísticas en orden descendente
 		ListaEquipos.sort((equipo1, equipo2) -> {
 			Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
@@ -508,97 +502,99 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 			}
 			return 0;
 		});
-      Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
+		Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
 
-      // Limpiar el modelo de datos de la tabla
-      ctm.setRowCount(0);
+		// Limpiar el modelo de datos de la tabla
+		ctm.setRowCount(0);
 
-      // Añadir la primera fila con los encabezados
-      Object[] primeraFila = {"Posición", "Equipo", "Puntos Totales", "Partidas Jugadas", "Partidas Ganadas", "Partidas Perdidas", "R. Diferencia"};
-      ctm.addRow(primeraFila);
+		// Añadir la primera fila con los encabezados
+		Object[] primeraFila = { "Posición", "Equipo", "P.Totales", "P.Jugadas", "P.Ganadas",
+				"P.Perdidas", "R.Diferencia" };
+		ctm.addRow(primeraFila);
 
-      int posicion = 1;
+		int posicion = 1;
 
-      for (Equipo equipo : ListaEquipos) {
-          if (!equipo.getNombre().equals("Equipo para Descansar")) {
-              Estadisticas estadisticas = obtenerEstadisticasEquipo(equipo, temporadaActual);
+		for (Equipo equipo : ListaEquipos) {
+			if (!equipo.getNombre().equals("Equipo para Descansar")) {
+				Estadisticas estadisticas = obtenerEstadisticasEquipo(equipo, temporadaActual);
 
-              Object[] fila = new Object[7];
-              fila[0] = posicion;
-              fila[1] = equipo.getNombre();
+				Object[] fila = new Object[7];
+				fila[0] = posicion;
+				fila[1] = equipo.getNombre();
 
-              if (estadisticas != null) {
-                  fila[2] = estadisticas.getPuntosTotales();
-                  fila[3] = estadisticas.getPartidosJugados();
-                  fila[4] = estadisticas.getPartidosGanados();
-                  fila[5] = estadisticas.getPartidosPerdidos();
-                  fila[6] = estadisticas.getRondasDiferencia();
-              } else {
-                  fila[2] = 0;
-                  fila[3] = 0;
-                  fila[4] = 0;
-                  fila[5] = 0;
-                  fila[6] = 0;
-              }
+				if (estadisticas != null) {
+					fila[2] = estadisticas.getPuntosTotales();
+					fila[3] = estadisticas.getPartidosJugados();
+					fila[4] = estadisticas.getPartidosGanados();
+					fila[5] = estadisticas.getPartidosPerdidos();
+					fila[6] = estadisticas.getRondasDiferencia();
+				} else {
+					fila[2] = 0;
+					fila[3] = 0;
+					fila[4] = 0;
+					fila[5] = 0;
+					fila[6] = 0;
+				}
 
-              ctm.addRow(fila);
-              posicion++;
-          }
-      }
-  }
+				ctm.addRow(fila);
+				posicion++;
+			}
+		}
+	}
 
-  /**
-   * Función para obtener las estadísticas de un equipo en una temporada específica desde la base de datos.
-   *
-   * @param equipo     el equipo del que se desean obtener las estadísticas
-   * @param temporada  la temporada de la que se desean obtener las estadísticas
-   * @return las estadísticas del equipo para la temporada especificada
-   */
-  private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
-      Estadisticas estadisticas = null;
+	/**
+	 * Función para obtener las estadísticas de un equipo en una temporada
+	 * específica desde la base de datos.
+	 *
+	 * @param equipo    el equipo del que se desean obtener las estadísticas
+	 * @param temporada la temporada de la que se desean obtener las estadísticas
+	 * @return las estadísticas del equipo para la temporada especificada
+	 */
+	private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
+		Estadisticas estadisticas = null;
 
-      try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
-          String query = "SELECT * FROM Estadisticas WHERE Temporada = ? AND Equipo = ?";
-          PreparedStatement ps = conn.prepareStatement(query);
-          ps.setInt(1, temporada.getNumero());
-          ps.setString(2, equipo.getNombre());
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
+			String query = "SELECT * FROM Estadisticas WHERE Temporada = ? AND Equipo = ?";
+			PreparedStatement ps = conn.prepareStatement(query);
+			ps.setInt(1, temporada.getNumero());
+			ps.setString(2, equipo.getNombre());
 
-          ResultSet rs = ps.executeQuery();
+			ResultSet rs = ps.executeQuery();
 
-          if (rs.next()) {
-              int puntosTotales = rs.getInt("PuntosTotales");
-              int partidosJugados = rs.getInt("PartidasJugadas");
-              int partidosGanados = rs.getInt("PartidasGanadas");
-              int partidosPerdidos = rs.getInt("PartidasPerdidas");
-              int rondasDiferencia = rs.getInt("RondasDiferencia");
+			if (rs.next()) {
+				int puntosTotales = rs.getInt("PuntosTotales");
+				int partidosJugados = rs.getInt("PartidasJugadas");
+				int partidosGanados = rs.getInt("PartidasGanadas");
+				int partidosPerdidos = rs.getInt("PartidasPerdidas");
+				int rondasDiferencia = rs.getInt("RondasDiferencia");
 
-              estadisticas = new Estadisticas(temporada);
-              estadisticas.setPuntosTotales(puntosTotales);
-              estadisticas.setPartidosJugados(partidosJugados);
-              estadisticas.setPartidosGanados(partidosGanados);
-              estadisticas.setPartidosPerdidos(partidosPerdidos);
-              estadisticas.setRondasDiferencia(rondasDiferencia);
-          }
+				estadisticas = new Estadisticas(temporada);
+				estadisticas.setPuntosTotales(puntosTotales);
+				estadisticas.setPartidosJugados(partidosJugados);
+				estadisticas.setPartidosGanados(partidosGanados);
+				estadisticas.setPartidosPerdidos(partidosPerdidos);
+				estadisticas.setRondasDiferencia(rondasDiferencia);
+			}
 
-          rs.close();
-          ps.close();
-      } catch (SQLException e) {
-          e.printStackTrace();
-      }
+			rs.close();
+			ps.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
 
-      return estadisticas;
-  }
+		return estadisticas;
+	}
 
 	/**
 	 * Funcion To PDF.
 	 */
 	private void toPDF() {
 	    // Definir el nombre por defecto del archivo PDF
-	    String defaultFileName = "ClasificacionTemporada"+ Seleccion.getTemporadaNumero() + ".pdf";
+	    String defaultFileName = "ClasificacionTemporada" + Seleccion.getTemporadaNumero() + ".pdf";
 
 	    try {
 	        // Crear un archivo temporal para el PDF
-	        File tempFile = File.createTempFile("ClasificacionTemporada"+ Seleccion.getTemporadaNumero(), ".pdf");
+	        File tempFile = File.createTempFile("ClasificacionTemporada" + Seleccion.getTemporadaNumero(), ".pdf");
 	        String tempFilePath = tempFile.getAbsolutePath();
 
 	        // Crear el contenido del documento PDF
@@ -607,20 +603,20 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 	            document.addPage(page);
 
 	            PDPageContentStream contentStream = new PDPageContentStream(document, page);
-	            contentStream.setFont(PDType1Font.HELVETICA , 12);
+	            contentStream.setFont(PDType1Font.HELVETICA, 12);
 
 	            // Crear la tabla para la clasificación
 	            float margin = 50;
 	            float yStart = page.getMediaBox().getHeight() - margin;
 	            float tableWidth = page.getMediaBox().getWidth() - 2 * margin;
-	            
+
 	            int numberOfRows = tableClasificacion.getRowCount();
 	            int numberOfColumns = tableClasificacion.getColumnCount();
 	            float[] columnWidths = new float[numberOfColumns];
 	            for (int i = 0; i < numberOfColumns; i++) {
-	                columnWidths[i] = tableWidth / (float)numberOfColumns;
+	                columnWidths[i] = tableWidth / (float) numberOfColumns;
 	            }
-	            
+
 	            // Dibujar encabezados de columna
 	            float yPosition = yStart;
 	            float rowHeight = 20;
@@ -632,6 +628,13 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 	                for (int column = 0; column < numberOfColumns; column++) {
 	                    String cellValue = String.valueOf(tableClasificacion.getValueAt(row, column));
 	                    contentStream.showText(cellValue);
+
+	                    // Ajustar el desplazamiento horizontal solo después de la segunda columna
+	                    if (column == 1) {
+	                        float xOffset = 25; // Ajusta este valor según el espacio deseado entre la segunda y tercera columna
+	                        contentStream.newLineAtOffset(xOffset, 0);
+	                    }
+
 	                    contentStream.newLineAtOffset(columnWidths[column], 0);
 	                }
 	                contentStream.endText();
@@ -663,12 +666,13 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 	            tempFile.delete();
 	        }
 
-	        Logger.nuevoMovimiento(ListaMovimientos, "Ha exportado en formato PDF la clasificación de la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
+	        Logger.nuevoMovimiento("Ha exportado en formato PDF la clasificación de la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
 	    } catch (IOException e) {
 	        e.printStackTrace();
 	        JOptionPane.showMessageDialog(this, "Error al exportar a PDF", "Error", JOptionPane.ERROR_MESSAGE);
 	    }
 	}
+
 
 	/**
 	 * Funcion para la Apertura de la Ventana.
@@ -697,7 +701,7 @@ public class Clasificacion extends JFrame implements ActionListener, WindowListe
 	public void windowClosing(WindowEvent e) {
 		if (Sesion.getUsuarioActual() != null) {
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 		}
 	}
 

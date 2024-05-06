@@ -18,7 +18,6 @@ import java.awt.event.FocusListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.SwingConstants;
@@ -90,9 +89,6 @@ public class Registro extends JFrame implements MouseListener, ActionListener, F
 
 	/** La Lista de Usuarios Totales que hay Registrados. */
 	private List<Usuario> listaUsuarios;
-
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
 	
 	/** El Boton para Ocultar o Mostrar la Contraseña 1. */
 	private JToggleButton tglbtnShowHide;
@@ -328,8 +324,7 @@ public class Registro extends JFrame implements MouseListener, ActionListener, F
 		// Cierro la conexion con la base de datos
 		em.close();
 		emf.close();
-		
-		ListaMovimientos = Logger.cargarMovimientos();
+
 	}
 
 	/**
@@ -474,7 +469,7 @@ public class Registro extends JFrame implements MouseListener, ActionListener, F
 	        JOptionPane.showMessageDialog(this, "Se ha registrado tu usuario con éxito", "Usuario Registrado",
 	                JOptionPane.INFORMATION_MESSAGE);
 
-	        Logger.nuevoMovimiento(ListaMovimientos, "Se ha creado el Usuario " + nuevoUsuario.getNombre() + ".");
+	        Logger.nuevoMovimiento("Se ha creado el Usuario " + nuevoUsuario.getNombre() + ".");
 
 	        // Creo las variables
 	        Login L = new Login();

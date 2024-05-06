@@ -1,11 +1,10 @@
 package definicion;
 
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -20,7 +19,7 @@ public class Logger implements Serializable {
 	private static final long serialVersionUID = -7021149973598236767L;
 
 	/** La Constante FILENAME que indica la ubicacion del fichero. */
-	private static final String FILENAME = "ficheros/logs.ser";
+	private static final String FILENAME = "ficheros/logs.txt";
 
 	/** El Usuario. */
 	private Usuario Usuario;
@@ -80,7 +79,7 @@ public class Logger implements Serializable {
 	 * @return Informacion en formato String
 	 */
 	public String toString() {
-		return (Usuario.getNombre() + ": " + TipoMovimiento + " " + Fecha + " " + Horario);
+		return (Usuario.getNombre() + ": " + TipoMovimiento + " | " + Fecha + "  | " + Horario);
 	}
 
 	/**
@@ -191,74 +190,123 @@ public class Logger implements Serializable {
 	}
 
 	/**
-	 * Funcion para Guardar movimientos en el fichero.
+	 * Registra un nuevo movimiento en el registro de actividades.
+	 * Si el usuario actual está disponible, crea un nuevo objeto {@code Logger} con el usuario actual,
+	 * el mensaje dado, y la fecha y hora actuales. Si no hay usuario actual, crea un objeto {@code Logger}
+	 * con un usuario vacío, el mensaje dado, y la fecha y hora actuales.
+	 * Después de agregar el nuevo movimiento a la lista de movimientos existente, guarda la lista actualizada
+	 * en el archivo de registro.
 	 *
-	 * @param movimientos la Lista de Movimientos
-	 */
-	// Guarda la lista de movimientos en un archivo
-	public static void guardarMovimientos(ArrayList<Logger> movimientos) {
-		try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(FILENAME))) {
-			oos.writeObject(movimientos);
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-	}
-
-	/**
-	 * Funcion para Cargar movimientos desde fichero.
-	 *
-	 * @return el ArrayList de Movimientos
-	 */
-	// Carga la lista de movimientos desde un archivo
-	@SuppressWarnings("unchecked")
-	public static ArrayList<Logger> cargarMovimientos() {
-		ArrayList<Logger> movimientos = new ArrayList<>();
-		try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(FILENAME))) {
-			movimientos = (ArrayList<Logger>) ois.readObject();
-		} catch (FileNotFoundException e) {
-			// El archivo no existe, se creará uno nuevo cuando sea necesario
-		} catch (IOException | ClassNotFoundException e) {
-			if (!movimientos.isEmpty()) {
-				e.printStackTrace();
-			}
-		}
-		return movimientos;
-	}
-
-	/**
-	 * Registra un nuevo movimiento en el registro de actividades y guarda la lista actualizada de movimientos.
-	 *
-	 * @param ListaMovimientos la lista de movimientos actualizada.
 	 * @param mensaje el mensaje que describe el movimiento registrado.
 	 */
-	public static void nuevoMovimiento(ArrayList<Logger> ListaMovimientos, String mensaje) {
-		ListaMovimientos = Logger.cargarMovimientos();
+	public static void nuevoMovimiento(String mensaje) {
+	    // Cargar la lista de movimientos existente
+	    ArrayList<Logger> movimientos = cargarMovimientos();
 
-		Calendar calendar = Calendar.getInstance();
-		int año = calendar.get(Calendar.YEAR);
-		int mes = calendar.get(Calendar.MONTH) + 1; // Nota: los meses comienzan desde 0
-		int dia = calendar.get(Calendar.DAY_OF_MONTH);
-		int hora = calendar.get(Calendar.HOUR_OF_DAY);
-		int minuto = calendar.get(Calendar.MINUTE);
+	    Calendar calendar = Calendar.getInstance();
+	    int año = calendar.get(Calendar.YEAR);
+	    int mes = calendar.get(Calendar.MONTH) + 1; // Nota: los meses comienzan desde 0
+	    int dia = calendar.get(Calendar.DAY_OF_MONTH);
+	    int hora = calendar.get(Calendar.HOUR_OF_DAY);
+	    int minuto = calendar.get(Calendar.MINUTE);
 
-		// Crear el formato de fecha y hora
-		Fecha fechaActual = new Fecha(dia, mes, año);
-		Horario horaActual = new Horario(hora, minuto);
-		
-		Usuario usuario = Sesion.getUsuarioActual();
-		
-		Logger movimiento = new Logger();
-		if (!(usuario == null)) {
-			movimiento = new Logger(usuario, mensaje, fechaActual, horaActual);
+	    // Crear el formato de fecha y hora
+	    Fecha fechaActual = new Fecha(dia, mes, año);
+	    Horario horaActual = new Horario(hora, minuto);
 
-		} else {
-			Usuario usuarioVacio = new Usuario();
-			movimiento = new Logger(usuarioVacio, mensaje, fechaActual, horaActual);
-		}
+	    Usuario usuario = Sesion.getUsuarioActual();
 
+	    Logger movimiento;
+	    if (usuario != null) {
+	        movimiento = new Logger(usuario, mensaje, fechaActual, horaActual);
+	    } else {
+	        Usuario usuarioVacio = new Usuario();
+	        movimiento = new Logger(usuarioVacio, mensaje, fechaActual, horaActual);
+	    }
 
-		ListaMovimientos.add(movimiento);
-		guardarMovimientos(ListaMovimientos);
+	    // Agregar el nuevo movimiento a la lista
+	    movimientos.add(movimiento);
+
+	    // Guardar la lista actualizada de movimientos
+	    guardarMovimientos(movimientos);
+	}
+
+	/**
+	 * Carga la lista de movimientos desde el archivo de registro.
+	 *
+	 * @return la lista de movimientos cargada desde el archivo.
+	 */
+	public static ArrayList<Logger> cargarMovimientos() {
+	    ArrayList<Logger> movimientos = new ArrayList<>();
+	    try (BufferedReader reader = new BufferedReader(new FileReader(FILENAME))) {
+	        String line;
+	        while ((line = reader.readLine()) != null) {
+	            Logger movimiento = parsearMovimiento(line);
+	            if (movimiento != null) {
+	                movimientos.add(movimiento);
+	            }
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    return movimientos;
+	}
+
+	/**
+	 * Parsea una línea de texto del archivo de registro en un objeto {@code Logger}.
+	 *
+	 * @param line la línea de texto del archivo de registro a ser parseada.
+	 * @return un objeto {@code Logger} creado a partir de la línea parseada, o {@code null} si ocurre un error.
+	 */
+	private static Logger parsearMovimiento(String line) {
+	    try {
+	        // Parsear la línea para reconstruir un objeto Logger
+	        String[] parts = line.split(" \\| ");
+
+	        // Extraer los componentes del movimiento
+	        String usuarioYTipo = parts[0].trim(); // Ejemplo: "admin: Ha iniciado sesión."
+	        String[] usuarioTipoParts = usuarioYTipo.split(":");
+	        String nombreUsuario = usuarioTipoParts[0].trim();
+	        String tipoMovimiento = usuarioTipoParts[1].trim();
+
+	        String fechaPart = parts[1].trim(); // Ejemplo: "2/5/2024"
+	        String horarioPart = parts[2].trim(); // Ejemplo: "13:46"
+
+	        String[] fechaParts = fechaPart.split("/");
+	        int dia = Integer.parseInt(fechaParts[0].trim());
+	        int mes = Integer.parseInt(fechaParts[1].trim());
+	        int año = Integer.parseInt(fechaParts[2].trim());
+
+	        String[] horarioParts = horarioPart.split(":");
+	        int hora = Integer.parseInt(horarioParts[0].trim());
+	        int minuto = Integer.parseInt(horarioParts[1].trim());
+
+	        Fecha fecha = new Fecha(dia, mes, año);
+	        Horario horario = new Horario(hora, minuto);
+
+	        Usuario usuario = new Usuario(nombreUsuario);
+	        return new Logger(usuario, tipoMovimiento, fecha, horario);
+
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	        return null;
+	    }
+	}
+
+	/**
+	 * Guarda la lista de movimientos en el archivo de registro.
+	 *
+	 * @param movimientos la lista de movimientos a ser guardada en el archivo.
+	 */
+	public static void guardarMovimientos(ArrayList<Logger> movimientos) {
+	    try (BufferedWriter writer = new BufferedWriter(new FileWriter(FILENAME))) {
+	        for (Logger movimiento : movimientos) {
+	            String logEntry = movimiento.toString();
+	            writer.write(logEntry);
+	            writer.newLine();
+	        }
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
 	}
 }

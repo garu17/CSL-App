@@ -128,9 +128,6 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 	/** La Lista de Temporadas Totales que hay Registradas. */
 	private ArrayList<Temporada> ListaTemporadas;
 
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
-
 	/** La Lista de Usuarios Registrados. */
 	private List<Usuario> ListaUsuarios;
 
@@ -404,8 +401,6 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		if (Seleccion.getTemporadaPosicion() != null) {
 			lstTemporada.setSelectedIndex(Seleccion.getTemporadaPosicion());
 		}
-		ListaMovimientos = Logger.cargarMovimientos();
-
 		EquipoSeleccion.setGuardado(false);
 
 		if (tlm.isEmpty()) {
@@ -553,8 +548,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 					eliminarCarpetaRecursivamente(carpetaJugadoresFile);
 				}
 
-				Logger.nuevoMovimiento(ListaMovimientos,
-						"Ha eliminado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
+				Logger.nuevoMovimiento("Ha eliminado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
 
 				try {
 					// Crear la conexión a la base de datos
@@ -642,11 +636,30 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 							// Modificar la temporada seleccionada a estado "ACTIVA"
 							String temporadaSeleccionada = comboBox.getSelectedItem().toString();
 							int numeroTemporada = Integer.parseInt(temporadaSeleccionada.replaceAll("[\\D]", ""));
-							for (Temporada temporada : ListaTemporadas) {
-								if (temporada.getNumero() == numeroTemporada) {
-									temporada.setEstado("ACTIVA");
-									break;
-								}
+							try {
+								// Crear la conexión a la base de datos
+								Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+								conn.setAutoCommit(false); // Desactivar el modo de autocommit
+
+								// Crear la consulta de actualización para el equipo
+								String queryEquipo = "UPDATE Temporada SET Estado = ? WHERE Numero = ?";
+								PreparedStatement psEquipo = conn.prepareStatement(queryEquipo);
+								psEquipo.setString(1, "ACTIVA");
+								psEquipo.setInt(2, numeroTemporada);
+								psEquipo.executeUpdate();
+								psEquipo.close();
+
+								// Confirmar la transacción
+								conn.commit();
+
+								// Cerrar la conexión
+								conn.close();
+
+							} catch (SQLException e) {
+								e.printStackTrace();
+								JOptionPane.showMessageDialog(this, "Error al eliminar datos de la temporada en la base de datos.",
+										"Error", JOptionPane.ERROR_MESSAGE);
+								return;
 							}
 						}
 					}
@@ -761,7 +774,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 			JOptionPane.showMessageDialog(this, (String) "Se ha cerrado sesión. Volviendo a Login.",
 					"Cierre de sesión correcto", JOptionPane.INFORMATION_MESSAGE);
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 			// Creo las variables
 			Login L = new Login();
@@ -1034,7 +1047,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 
 		JOptionPane.showMessageDialog(this, "XML exportado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
-		Logger.nuevoMovimiento(ListaMovimientos, "Ha exportado en formato XML los datos de la Temporadas.");
+		Logger.nuevoMovimiento("Ha exportado en formato XML los datos de la Temporadas.");
 	}
 
 	/**
@@ -1267,7 +1280,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 	public void windowClosing(WindowEvent e) {
 		if (Sesion.getUsuarioActual() != null) {
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 		}
 	}

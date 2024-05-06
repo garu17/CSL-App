@@ -245,9 +245,6 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 	/** La Lista de Equipos Totales que hay Registrados. */
 	private ArrayList<Equipo> ListaEquipos;
 
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
-
 	/** La Clase AñadirTemporada */
 	AñadirTemporada AT;
 
@@ -335,27 +332,71 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 	/** El Mes de la Fecha de Alta del Entrenador. */
 	Integer MesNacimiento = 1;
 
-	/** El Año de la Fecha de Alta del Entrenador. */
+	/**
+	 * Año de nacimiento por defecto para un objeto de tipo Integer.
+	 */
 	Integer AñoNacimiento = 2024;
 
-	/** La Nacionalidad de el Entrenador por defecto. */
+	/**
+	 * La nacionalidad por defecto del entrenador.
+	 */
 	String NacionalidadEntrenador = "...";
 
-	/** La Nacionalidad de los Jugadores por defecto. */
+	/**
+	 * La nacionalidad por defecto de los jugadores.
+	 */
 	String NacionalidadJugador = "...";
 
-	/** La Posicion de los Jugadores por defecto. */
+	/**
+	 * La posición por defecto de los jugadores.
+	 */
 	String PosicionJugador = "...";
 
+	/**
+	 * JLabel para mostrar el año de nacimiento del entrenador.
+	 */
 	private JLabel lblEntrenadorAño_1;
+
+	/**
+	 * JLabel para mostrar el mes de nacimiento del entrenador.
+	 */
 	private JLabel lblEntrenadorMes_1;
+
+	/**
+	 * JLabel para mostrar el día de nacimiento del entrenador.
+	 */
 	private JLabel lblEntrenadorDia_1;
+
+	/**
+	 * JComboBox para seleccionar el día de nacimiento de un jugador.
+	 */
 	private JComboBox<Integer> comboBoxJugadorDia;
+
+	/**
+	 * JLabel para mostrar la primera barra de separación en la fecha de nacimiento de un jugador.
+	 */
 	private JLabel lblNacimientoBarra1;
+
+	/**
+	 * JComboBox para seleccionar el mes de nacimiento de un jugador.
+	 */
 	private JComboBox<Integer> comboBoxJugadorMes;
+
+	/**
+	 * JLabel para mostrar la segunda barra de separación en la fecha de nacimiento de un jugador.
+	 */
 	private JLabel lblNacimientoBarra2;
+
+	/**
+	 * JComboBox para seleccionar el año de nacimiento de un jugador.
+	 */
 	private JComboBox<Integer> comboBoxJugadorAño;
+
+	/**
+	 * JLabel para mostrar la fecha de nacimiento de un jugador.
+	 */
 	private JLabel lblFechaNacimiento;
+
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -951,9 +992,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 		lblCreacionDia.setFont(new Font("Dialog", Font.BOLD, 10));
 
 		ListaJugadores = new ArrayList<Jugador>();
-		ListaEquipos = Equipo.cargarEquipos();
-		ListaMovimientos = Logger.cargarMovimientos();
-
+		ListaEquipos = Equipo.cargarEquipos(0);
 	};
 
 	/**
@@ -1515,7 +1554,7 @@ public class AñadirEquipo extends JFrame implements ActionListener, ListSelecti
 			return;
 		}
 
-		Logger.nuevoMovimiento(ListaMovimientos, "Ha creado el Equipo " + nuevoEquipo.getNombre() + ".");
+		Logger.nuevoMovimiento("Ha creado el Equipo " + nuevoEquipo.getNombre() + ".");
 
 		// Se detecta desde que ventana externa a sido abierta la Clase
 		switch (abierto) {

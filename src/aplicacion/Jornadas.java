@@ -4,7 +4,6 @@ package aplicacion;
 import java.awt.EventQueue;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -79,9 +78,6 @@ public class Jornadas extends JFrame implements ActionListener, WindowListener {
 
 	/** El Tabbed Pane de las Jornadas. */
 	private JTabbedPane tabbedPaneJornadas;
-
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -268,9 +264,6 @@ public class Jornadas extends JFrame implements ActionListener, WindowListener {
 			btnEditarTemp.setVisible(false);
 			btnPanel.setBounds(864, 22, 140, 45);
 		}
-		
-		ListaMovimientos = Logger.cargarMovimientos();
-
 	}
 
 	/**
@@ -359,7 +352,7 @@ public class Jornadas extends JFrame implements ActionListener, WindowListener {
 			JOptionPane.showMessageDialog(this, (String) "Se ha cerrado sesión. Volviendo a Login.",
 					"Cierre de sesión correcto", JOptionPane.INFORMATION_MESSAGE);
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 			// Creo las variables
 			Login L = new Login();
@@ -467,7 +460,7 @@ public class Jornadas extends JFrame implements ActionListener, WindowListener {
 	@Override
 	public void windowClosing(WindowEvent e) {
 		if (Sesion.getUsuarioActual() != null) {
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 		}
 	}
 

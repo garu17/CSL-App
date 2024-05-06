@@ -305,7 +305,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 		contentPane.add(lblListaEquipos);
 
 		ListaMovimientos = Logger.cargarMovimientos();
-		ListaEquipos = Equipo.cargarEquipos();
+		ListaEquipos = Equipo.cargarEquipos(0);
 
 		// Se conecta a la base de datos
 		// crea una base de datos si todavía no existe
@@ -427,8 +427,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 					"Confirmacion", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 			if (opcion == JOptionPane.YES_OPTION) {
 
-				Logger.nuevoMovimiento(ListaMovimientos,
-						"Ha eliminado el Usuario " + ulm.elementAt(indiceSeleccionado).getNombre() + ".");
+				Logger.nuevoMovimiento("Ha eliminado el Usuario " + ulm.elementAt(indiceSeleccionado).getNombre() + ".");
 
 				mlm.clear();
 
@@ -580,7 +579,7 @@ public class Panel extends JFrame implements ActionListener, ListSelectionListen
 
 			if (opcion == JOptionPane.YES_OPTION) {
 
-				ListaEquipos = Equipo.cargarEquipos();
+				ListaEquipos = Equipo.cargarEquipos(0);
 
 				// Eliminar fotos de jugadores asociadas al equipo
 				File directorioEscudos = new File("ficheros/Escudos/");

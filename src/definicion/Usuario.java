@@ -180,7 +180,6 @@ public class Usuario implements Serializable {
 	/**
 	 * Funcion para Obtener usuarios por defecto.
 	 *
-	 * @return el ArrayList de los Usuarios por defecto
 	 */
 	// Constructor para añadir usuarios por defecto
 	public static void obtenerUsuariosPorDefecto() {
