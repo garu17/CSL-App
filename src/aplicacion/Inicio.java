@@ -636,11 +636,30 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 							// Modificar la temporada seleccionada a estado "ACTIVA"
 							String temporadaSeleccionada = comboBox.getSelectedItem().toString();
 							int numeroTemporada = Integer.parseInt(temporadaSeleccionada.replaceAll("[\\D]", ""));
-							for (Temporada temporada : ListaTemporadas) {
-								if (temporada.getNumero() == numeroTemporada) {
-									temporada.setEstado("ACTIVA");
-									break;
-								}
+							try {
+								// Crear la conexión a la base de datos
+								Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
+								conn.setAutoCommit(false); // Desactivar el modo de autocommit
+
+								// Crear la consulta de actualización para el equipo
+								String queryEquipo = "UPDATE Temporada SET Estado = ? WHERE Numero = ?";
+								PreparedStatement psEquipo = conn.prepareStatement(queryEquipo);
+								psEquipo.setString(1, "ACTIVA");
+								psEquipo.setInt(2, numeroTemporada);
+								psEquipo.executeUpdate();
+								psEquipo.close();
+
+								// Confirmar la transacción
+								conn.commit();
+
+								// Cerrar la conexión
+								conn.close();
+
+							} catch (SQLException e) {
+								e.printStackTrace();
+								JOptionPane.showMessageDialog(this, "Error al eliminar datos de la temporada en la base de datos.",
+										"Error", JOptionPane.ERROR_MESSAGE);
+								return;
 							}
 						}
 					}
