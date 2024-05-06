@@ -132,20 +132,61 @@ public class MostrarEquipo extends JFrame implements ActionListener {
 	/** El Label de los Datos del Año de la Fecha del Alta del Entrenador. */
 	private JLabel lblEntrenadorDatosFechaAño;
 
-	/** El Label de la Primera Barra de la Fecha de Alta del Entrenador. */
+	/**
+	 * El Label de la Primera Barra de la Fecha de Alta del Entrenador.
+	 */
 	private JLabel lblEntrenadorDatosFechaBarra1;
 
-	/** El Label de la Segunda Barra de la Fecha de Alta del Entrenador. */
+	/**
+	 * El Label de la Segunda Barra de la Fecha de Alta del Entrenador.
+	 */
 	private JLabel lblEntrenadorDatosFechaBarra2;
+
+	/**
+	 * El Label para la Fecha de Nacimiento de los Jugadores.
+	 */
 	private JLabel lblJugadoresFechaNac;
+
+	/**
+	 * El Label para la Fecha de Creación.
+	 */
 	private JLabel lblFechaCreacion;
+
+	/**
+	 * El panel de creación.
+	 */
 	private JPanel panelCreacion;
+
+	/**
+	 * El Label para el Día de Creación.
+	 */
 	private JLabel lblCreacionDia;
+
+	/**
+	 * El Label para el Mes de Creación.
+	 */
 	private JLabel lblCreacionMes;
+
+	/**
+	 * El Label para el Año de Creación.
+	 */
 	private JLabel lblCreacionAño;
+
+	/**
+	 * El Label de la Primera Barra de la Fecha de Creación.
+	 */
 	private JLabel lblCreacionBarra1;
+
+	/**
+	 * El Label de la Segunda Barra de la Fecha de Creación.
+	 */
 	private JLabel lblCreacionBarra2;
+
+	/**
+	 * El Label para la Foto de los Jugadores.
+	 */
 	private JLabel lblJugadoresFoto;
+
 
 	/**
 	 * Ejecuta la aplicacion.

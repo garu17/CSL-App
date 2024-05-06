@@ -15,6 +15,7 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 import definicion.Jornada;
+import definicion.Jugador;
 import definicion.Logger;
 import definicion.Participante;
 import definicion.Partido;
@@ -37,6 +38,10 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.StandardCopyOption;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -63,7 +68,7 @@ import javax.swing.JTable;
 public class EditarTemp extends JFrame implements ActionListener, WindowListener, ListSelectionListener {
 
 	/** La Constante serialVersionUID generada para identificarse. */
-	private static final long serialVersionUID = 1L;
+	private static final long serialVersionUID = 1L; 
 
 	/** El Content Pane principal. */
 	private JPanel contentPane;
@@ -143,9 +148,6 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	/** La Lista de Equipos de la Temporada. */
 	private List<Equipo> ListaEquipos;
 
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
-
 	/** La Lista de Equipos Totales que hay Registrados. */
 	private ArrayList<Equipo> ListaEquiposRegistrados;
 
@@ -163,6 +165,9 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	 * Temporada.
 	 */
 	Boolean encontrado = false;
+
+	/** Si algun equipo se ha eliminado o añadido a la temporada */
+	Boolean equiposCambiados = false;
 
 	/** El Boton de que Inicia la Temporada. */
 	private JButton btnIniciar;
@@ -414,10 +419,8 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 
 		ListaTemporadas = Temporada.cargarTemporadas();
 
-		ListaMovimientos = Logger.cargarMovimientos();
-
-		ListaEquipos = Seleccion.getTemporadaSeleccionada().getListaEquipos();
-		ListaEquiposRegistrados = Equipo.cargarEquipos();
+		ListaEquipos = Equipo.cargarEquipos(Seleccion.getTemporadaNumero());
+		ListaEquiposRegistrados = Equipo.cargarEquipos(0);
 
 		Boolean hayActiva = false;
 
@@ -561,7 +564,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 		JOptionPane.showMessageDialog(this, (String) "Se ha cerrado sesión. Volviendo a Login.",
 				"Cierre de sesión correcto", JOptionPane.INFORMATION_MESSAGE);
 
-		Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+		Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 		// Creo las variables
 		Login L = new Login();
@@ -615,6 +618,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			}
 
 			modificadoEquipos = true;
+			equiposCambiados = true;
 		} else {
 			// No hay ningún elemento seleccionado
 			mostrarError("Error, ningún elemento seleccionado en la lista");
@@ -730,9 +734,6 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 
-			// Elimino el equipo del programa
-			ListaEquiposRegistrados.remove(EquipoSeleccion.getEquipoSeleccionado());
-
 			EditarEquipo EE = new EditarEquipo();
 
 			setEnabled(false);
@@ -749,7 +750,6 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					// Establece que la ventana se quede en primer plano
 					requestFocus();
 
-					elm2.add(EquipoSeleccion.getEquipoPosicion(), EquipoSeleccion.getEquipoSeleccionado());
 					if (elm.contains(EquipoSeleccion.getEquipoSeleccionado()) && EquipoSeleccion.getGuardado()) {
 						elm.removeElement(EquipoSeleccion.getEquipoSeleccionado());
 
@@ -796,6 +796,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			ListaEquipos.remove(indiceSeleccionado);
 
 			modificadoEquipos = true;
+			equiposCambiados = true;
 		} else {
 			// No hay ningún elemento seleccionado
 			mostrarError("Error, ningún elemento seleccionado en la lista");
@@ -806,6 +807,10 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	 * Funcion para Guardar.
 	 */
 	private void Guardar(Boolean mostrarMensaje) {
+
+		if (!mostrarMensaje && elm.getSize() < 6) {
+			return;
+		}
 
 		if (modificadoEquipos) {
 			if (elm.getSize() < 6) {
@@ -838,6 +843,96 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 						JOptionPane.INFORMATION_MESSAGE);
 			}
 
+			if (equiposCambiados) {
+
+				Temporada temporadaSele = new Temporada();
+				ListaTemporadas = Temporada.cargarTemporadas();
+
+				for (Temporada temporada : ListaTemporadas) {
+					if (Seleccion.getTemporadaNumero().equals(temporada.getNumero())) {
+						temporadaSele.setNumero(temporada.getNumero());
+						temporadaSele.setEstado(temporada.getEstado());
+						temporadaSele.setFechaInicio(temporada.getFechaInicio());
+						temporadaSele.setListaEquipos(temporada.getListaEquipos());
+						temporadaSele.setListaJornadas(temporada.getListaJornadas());
+
+						File EscudosTemporada = new File("ficheros/Escudos/");
+						File JugadoresTemporada = new File("ficheros/Jugadores/");
+
+						// Crear una carpeta dentro de Escudos para los escudos de la temporada
+						File escudosTemporadaFolder = new File(EscudosTemporada, "Temporada" + temporada.getNumero() + "/");
+						if (!escudosTemporadaFolder.exists()) {
+							escudosTemporadaFolder.mkdirs();
+						}
+
+						// Crear una carpeta dentro de Jugadores para los jugadores de la temporada
+						File jugadoresTemporadaFolder = new File(JugadoresTemporada,
+								"Temporada" + temporada.getNumero() + "/");
+						if (!jugadoresTemporadaFolder.exists()) {
+							jugadoresTemporadaFolder.mkdirs();
+						}
+
+						// Copiar escudos y fotos de jugadores
+						copiarEscudos(temporada, escudosTemporadaFolder);
+						copiarFotosJugadores(temporada, jugadoresTemporadaFolder);
+					}
+				}
+
+				try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
+					conn.setAutoCommit(false); // Desactivar el modo de autocommit
+
+					for (Equipo equipo : Seleccion.getTemporadaSeleccionada().getListaEquipos()) {
+						// Crear la consulta de actualizacion para la relación entre equipo y temporada
+						String queryTemporadaParticipada = "UPDATE TemporadaParticipada SET Escudo = ?, Descripcion = ? WHERE Temporada = ? AND Equipo = ?";
+						PreparedStatement psTemporadaParticipada = conn.prepareStatement(queryTemporadaParticipada);
+						// Asignar los valores a los parámetros
+						psTemporadaParticipada.setString(1, equipo.getEscudo());
+						psTemporadaParticipada.setString(2, equipo.getDescripcion());
+						psTemporadaParticipada.setInt(3, temporadaSele.getNumero());
+						psTemporadaParticipada.setString(4, equipo.getNombre());
+						psTemporadaParticipada.executeUpdate();
+						psTemporadaParticipada.close();
+
+						// Crear la consulta de actualización para el entrenador
+						String queryEntrenadorContratado = "UPDATE EntrenadorContratado SET Nombre = ?, Apellido = ?, Nacionalidad = ? WHERE Entrenador = ? AND Equipo = ? AND Temporada = ?";
+						PreparedStatement psEntrenadorContratado = conn.prepareStatement(queryEntrenadorContratado);
+						psEntrenadorContratado.setString(1, equipo.getEntrenador().getNombre());
+						psEntrenadorContratado.setString(2, equipo.getEntrenador().getApellido());
+						psEntrenadorContratado.setString(3, equipo.getEntrenador().getNacionalidad());
+						psEntrenadorContratado.setString(4, equipo.getEntrenador().getDNI());
+						psEntrenadorContratado.setString(5, equipo.getNombre());
+						psEntrenadorContratado.setInt(6, temporadaSele.getNumero());
+						psEntrenadorContratado.executeUpdate();
+						psEntrenadorContratado.close();
+
+						for (Jugador jugador : equipo.getListaJugadores()) {
+							// Crear la consulta de inserción para la relación entre equipo y entrenador
+							String queryJugadorContratado = "UPDATE JugadorContratado SET Nombre = ?, Apellido = ?, Nacionalidad = ?, Foto = ?, Rol = ? WHERE Jugador = ? AND Equipo = ? AND Temporada = ?";
+							PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
+							// Asignar los valores a los parámetros
+							psJugadorContratado.setString(1, jugador.getNombre());
+							psJugadorContratado.setString(2, jugador.getApellido());
+							psJugadorContratado.setString(3, jugador.getNacionalidad());
+							psJugadorContratado.setString(4, jugador.getFoto());
+							psJugadorContratado.setString(5, jugador.getPosicion());
+							psJugadorContratado.setString(6, jugador.getDNI());
+							psJugadorContratado.setString(7, equipo.getNombre());
+							psJugadorContratado.setInt(8, temporadaSele.getNumero());
+							psJugadorContratado.executeUpdate();
+							psJugadorContratado.close();
+						}
+					}
+
+					// Confirmar la transacción
+					conn.commit();
+
+					// Cerrar el PreparedStatement
+				} catch (SQLException e) {
+					e.printStackTrace();
+					// Manejar el error apropiadamente
+				}
+			}
+
 		}
 		// Si la Temporada esta Activa
 		else if (comprobarTemporada()) {
@@ -845,8 +940,10 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			// Borra las estadísticas por temporada después de recorrer todas las jornadas
 			for (Jornada jornada : ListaJornadas) {
 				for (Partido partido : jornada.getListaPartidos()) {
-					Equipo.limpiarEstadisticasEquipo(Seleccion.getTemporadaSeleccionada(), partido.getEquipoLocal().getNombre());
-					Equipo.limpiarEstadisticasEquipo(Seleccion.getTemporadaSeleccionada(), partido.getEquipoVisitante().getNombre());
+					Equipo.limpiarEstadisticasEquipo(Seleccion.getTemporadaSeleccionada(),
+							partido.getEquipoLocal().getNombre());
+					Equipo.limpiarEstadisticasEquipo(Seleccion.getTemporadaSeleccionada(),
+							partido.getEquipoVisitante().getNombre());
 				}
 			}
 
@@ -857,7 +954,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 						.getView();
 				// Se busca la Jornada en concreto dentro de la lista de jornadas
 				Jornada jornada = ListaJornadas.get(i);
-				
+
 				// Se recorre cada partido de cada jornada
 				for (Partido partido : jornada.getListaPartidos()) {
 
@@ -979,7 +1076,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().add(partido.getEquipoLocal());
 					Seleccion.getTemporadaSeleccionada().getListaEquipos().add(partido.getEquipoVisitante());
 
-					try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+					try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
 						conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 						// Crear la consulta SQL para actualizar las estadísticas
@@ -1025,8 +1122,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 					JOptionPane.INFORMATION_MESSAGE);
 		}
 
-		Logger.nuevoMovimiento(ListaMovimientos,
-				"Ha editado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
+		Logger.nuevoMovimiento("Ha editado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
 
 	}
 
@@ -1034,7 +1130,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	 * Función para llenar la tabla con datos de estadísticas desde la base de
 	 * datos.
 	 */
-	private void llenarTabla() {		
+	private void llenarTabla() {
 		// Ordenar la lista de equipos por estadísticas en orden descendente
 		ListaEquipos.sort((equipo1, equipo2) -> {
 			Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
@@ -1047,7 +1143,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			}
 			return 0;
 		});
-		
+
 		Temporada temporadaActual = Seleccion.getTemporadaSeleccionada();
 
 		// Limpiar el modelo de datos de la tabla
@@ -1099,7 +1195,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	private Estadisticas obtenerEstadisticasEquipo(Equipo equipo, Temporada temporada) {
 		Estadisticas estadisticas = null;
 
-		try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
 			String query = "SELECT * FROM Estadisticas WHERE Temporada = ? AND Equipo = ?";
 			PreparedStatement ps = conn.prepareStatement(query);
 			ps.setInt(1, temporada.getNumero());
@@ -1156,7 +1252,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 			case JOptionPane.CLOSED_OPTION:
 				return;
 			case 0:
-				try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+				try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
 					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 					// Crear la consulta SQL para actualizar el estado de la temporada a
@@ -1176,8 +1272,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 
 					temporadaSeleccionada.setEstado("FINALIZADA");
 
-					Logger.nuevoMovimiento(ListaMovimientos,
-							"Ha finalizado la Temporada " + temporadaSeleccionada.getNumero() + ".");
+					Logger.nuevoMovimiento("Ha finalizado la Temporada " + temporadaSeleccionada.getNumero() + ".");
 
 					// Buscar temporada con el estado "PROXIMAMENTE"
 					DefaultComboBoxModel<String> comboBoxModel = new DefaultComboBoxModel<>();
@@ -1235,37 +1330,38 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	 * @return true si todos los partidos están jugados, false en caso contrario
 	 */
 	private boolean todosPartidosJugados(Temporada temporada) {
-	    int totalPartidos = 0;
-	    int partidosJugados = 0;
+		int totalPartidos = 0;
+		int partidosJugados = 0;
 
-	    try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
-	        // Contar el número total de partidos en la temporada
-	        String countTotalPartidosQuery = "SELECT COUNT(*) FROM Partido WHERE Temporada = ?";
-	        PreparedStatement psCountTotalPartidos = conn.prepareStatement(countTotalPartidosQuery);
-	        psCountTotalPartidos.setInt(1, temporada.getNumero());
+		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
+			// Contar el número total de partidos en la temporada
+			String countTotalPartidosQuery = "SELECT COUNT(*) FROM Partido WHERE Temporada = ?";
+			PreparedStatement psCountTotalPartidos = conn.prepareStatement(countTotalPartidosQuery);
+			psCountTotalPartidos.setInt(1, temporada.getNumero());
 
-	        ResultSet rsTotalPartidos = psCountTotalPartidos.executeQuery();
-	        if (rsTotalPartidos.next()) {
-	            totalPartidos = rsTotalPartidos.getInt(1);
-	        }
+			ResultSet rsTotalPartidos = psCountTotalPartidos.executeQuery();
+			if (rsTotalPartidos.next()) {
+				totalPartidos = rsTotalPartidos.getInt(1);
+			}
 
-	        // Contar el número de partidos jugados en la temporada
-	        String countPartidosJugadosQuery = "SELECT COUNT(*) FROM Partido WHERE Temporada = ? AND Jugado = true";
-	        PreparedStatement psCountPartidosJugados = conn.prepareStatement(countPartidosJugadosQuery);
-	        psCountPartidosJugados.setInt(1, temporada.getNumero());
+			// Contar el número de partidos jugados en la temporada
+			String countPartidosJugadosQuery = "SELECT COUNT(*) FROM Partido WHERE Temporada = ? AND Jugado = true";
+			PreparedStatement psCountPartidosJugados = conn.prepareStatement(countPartidosJugadosQuery);
+			psCountPartidosJugados.setInt(1, temporada.getNumero());
 
-	        ResultSet rsPartidosJugados = psCountPartidosJugados.executeQuery();
-	        if (rsPartidosJugados.next()) {
-	            partidosJugados = rsPartidosJugados.getInt(1);
-	        }
+			ResultSet rsPartidosJugados = psCountPartidosJugados.executeQuery();
+			if (rsPartidosJugados.next()) {
+				partidosJugados = rsPartidosJugados.getInt(1);
+			}
 
-	        // Comparar el número de partidos jugados con el total de partidos
-	        return partidosJugados == totalPartidos;
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        // Manejar el error apropiadamente (lanzar una excepción, mostrar un mensaje, etc.)
-	        return false;
-	    }
+			// Comparar el número de partidos jugados con el total de partidos
+			return partidosJugados == totalPartidos;
+		} catch (SQLException e) {
+			e.printStackTrace();
+			// Manejar el error apropiadamente (lanzar una excepción, mostrar un mensaje,
+			// etc.)
+			return false;
+		}
 	}
 
 	/**
@@ -1278,7 +1374,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 				"Iniciar Temporada", JOptionPane.YES_NO_OPTION, JOptionPane.WARNING_MESSAGE);
 
 		if (opcion == JOptionPane.YES_OPTION) {
-			try (Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123")) {
+			try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
 				conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 				// Crear la consulta SQL para actualizar el estado de la temporada a "ACTIVA"
@@ -1298,11 +1394,10 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 				// Actualizar el estado localmente
 				temporadaSeleccionada.setEstado("ACTIVA");
 
-				Logger.nuevoMovimiento(ListaMovimientos,
-						"Ha iniciado la Temporada " + temporadaSeleccionada.getNumero() + ".");
+				Logger.nuevoMovimiento("Ha iniciado la Temporada " + temporadaSeleccionada.getNumero() + ".");
 
 				Seleccion.setTemporadaPosicion(0);
-				
+
 				// Crear las variables para la ventana de inicio
 				Inicio I = new Inicio();
 
@@ -1393,7 +1488,7 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	public void windowClosing(WindowEvent e) {
 		if (Sesion.getUsuarioActual() != null) {
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 		}
 	}
@@ -1441,5 +1536,65 @@ public class EditarTemp extends JFrame implements ActionListener, WindowListener
 	 */
 	@Override
 	public void windowDeactivated(WindowEvent e) {
+	}
+
+	private void copiarEscudos(Temporada temporada, File destinoFolder) {
+		for (Equipo equipo : temporada.getListaEquipos()) {
+			if (equipo.getNombre().equals("Equipo para Descansar")) {
+				continue;
+			}
+			String extension = obtenerExtension(equipo.getEscudo());
+			String nombreEscudo = equipo.getNombre() + extension;
+			File destinoArchivo = new File(destinoFolder, nombreEscudo);
+
+			File escudoAnterior = new File("ficheros/Escudos/", nombreEscudo);
+			if (escudoAnterior.exists()) {
+				try {
+					Files.copy(escudoAnterior.toPath(), destinoArchivo.toPath(), StandardCopyOption.REPLACE_EXISTING);
+					equipo.setEscudo("ficheros/Escudos/Temporada" + temporada.getNumero() + "/" + equipo.getNombre()
+							+ obtenerExtension(equipo.getEscudo()));
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+
+		}
+	}
+
+	private void copiarFotosJugadores(Temporada temporada, File destinoFolder) {
+		for (Equipo equipo : temporada.getListaEquipos()) {
+			if (equipo.getNombre().equals("Equipo para Descansar")) {
+				continue;
+			}
+			for (Jugador jugador : equipo.getListaJugadores()) {
+				String extensionFoto = obtenerExtension(jugador.getFoto());
+				String nombreFoto = equipo.getNombre() + "-" + jugador.getDNI() + extensionFoto;
+				File destinoArchivoFoto = new File(destinoFolder, nombreFoto);
+
+					File fotoAnterior = new File("ficheros/Jugadores/", nombreFoto);
+					if (fotoAnterior.exists()) {
+						try {
+							Files.copy(fotoAnterior.toPath(), destinoArchivoFoto.toPath(),
+									StandardCopyOption.REPLACE_EXISTING);
+							jugador.setFoto("ficheros/Jugadores/Temporada" + temporada.getNumero() + "/" + equipo.getNombre()
+									+ "-" + jugador.getDNI() + obtenerExtension(jugador.getFoto()));
+						} catch (IOException e) {
+							e.printStackTrace();
+						}
+					}
+				
+			}
+		}
+	}
+
+	/**
+	 * Función para obtener la extensión de un archivo.
+	 */
+	private String obtenerExtension(String nombreArchivo) {
+		int lastIndex = nombreArchivo.lastIndexOf(".");
+		if (lastIndex == -1) {
+			return ""; // No se encontró una extensión
+		}
+		return "."+nombreArchivo.substring(lastIndex + 1);
 	}
 }

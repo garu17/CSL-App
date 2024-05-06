@@ -249,9 +249,6 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 	/** La Lista de Equipos Totales que hay Registrados. */
 	private ArrayList<Equipo> ListaEquipos;
 
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
-
 	/** Los Datos del Equipo Original. */
 	private Equipo DatosEquipo;
 
@@ -345,27 +342,71 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 	/** El Año de la Fecha de Alta del Entrenador. */
 	Integer AñoNacimiento = 2024;
 
-	/** La Nacionalidad de el Entrenador por defecto. */
+	/**
+	 * La nacionalidad por defecto del entrenador.
+	 */
 	String NacionalidadEntrenador = "...";
 
-	/** La Nacionalidad de los Jugadores por defecto. */
+	/**
+	 * La nacionalidad por defecto de los jugadores.
+	 */
 	String NacionalidadJugador = "...";
 
-	/** La Posicion de los Jugadores por defecto. */
+	/**
+	 * La posición por defecto de los jugadores.
+	 */
 	String PosicionJugador = "...";
 
-	/** La Lista de las Fotos de los Jugadores que hay que eliminar. */
+	/**
+	 * Lista de las rutas de las fotos de los jugadores que deben ser eliminadas.
+	 */
 	ArrayList<String> FotoJugadoresEliminados = new ArrayList<String>();
 
+	/**
+	 * Label para el año de nacimiento del entrenador.
+	 */
 	private JLabel lblEntrenadorAño_1;
+
+	/**
+	 * Label para el mes de nacimiento del entrenador.
+	 */
 	private JLabel lblEntrenadorMes_1;
+
+	/**
+	 * Label para el día de nacimiento del entrenador.
+	 */
 	private JLabel lblEntrenadorDia_1;
+
+	/**
+	 * ComboBox para seleccionar el día de nacimiento de un jugador.
+	 */
 	private JComboBox<Integer> comboBoxJugadorDia;
+
+	/**
+	 * Label para la primera barra de separación en la fecha de nacimiento de un jugador.
+	 */
 	private JLabel lblNacimientoBarra1;
+
+	/**
+	 * ComboBox para seleccionar el mes de nacimiento de un jugador.
+	 */
 	private JComboBox<Integer> comboBoxJugadorMes;
+
+	/**
+	 * Label para la segunda barra de separación en la fecha de nacimiento de un jugador.
+	 */
 	private JLabel lblNacimientoBarra2;
+
+	/**
+	 * ComboBox para seleccionar el año de nacimiento de un jugador.
+	 */
 	private JComboBox<Integer> comboBoxJugadorAño;
+
+	/**
+	 * Label para la fecha de nacimiento de un jugador.
+	 */
 	private JLabel lblFechaNacimiento;
+
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -650,6 +691,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		contentPane.add(btnAñadirEscudo);
 
 		textNombreEquipo = new JTextField();
+		textNombreEquipo.setEditable(false);
 		textNombreEquipo.setBorder(new LineBorder(new Color(171, 173, 179)));
 		textNombreEquipo.setFont(new Font("Dialog", Font.PLAIN, 22));
 		textNombreEquipo.setBounds(36, 41, 463, 33);
@@ -961,10 +1003,9 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		lblCreacionDia.setForeground(Color.GRAY);
 		lblCreacionDia.setFont(new Font("Dialog", Font.BOLD, 10));
 
-		ListaEquipos = Equipo.cargarEquipos();
+		ListaEquipos = Equipo.cargarEquipos(0);
 
 		ListaJugadoresRegistrados = EquipoModificado.getListaJugadores();
-		ListaMovimientos = Logger.cargarMovimientos();
 
 		DatosEquipo = EquipoSeleccion.getEquipoSeleccionado();
 		DatosJugadores = new ArrayList<Jugador>();
@@ -1269,7 +1310,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 		try {
 			String nombreArchivo = NombreEquipo + "." + obtenerExtension(Escudo);
 			// Construir la ruta de destino en la carpeta /ficheros/escudos
-			String destinationPath = "ficheros/escudos/" + nombreArchivo; // Suponiendo que la extensión sea ".png"
+			String destinationPath = "ficheros/escudos/" + nombreArchivo;
 
 			// Copiar el archivo a la carpeta de destino
 			Files.copy(Paths.get(Escudo), Paths.get(destinationPath), StandardCopyOption.REPLACE_EXISTING);
@@ -1424,6 +1465,13 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 			int countEntrenador = rsVerificarEntrenador.getInt(1);
 			rsVerificarEntrenador.close();
 			psVerificarEntrenador.close();
+			
+			// Eliminar registros asociados en entrenadorcontratado
+			String deleteEntrenadorContratado = "DELETE FROM EntrenadorContratado WHERE Equipo = ? AND Temporada = ?";
+			PreparedStatement psDeleteEntrenadorContratado = conn.prepareStatement(deleteEntrenadorContratado);
+			psDeleteEntrenadorContratado.setInt(2, 0);
+			psDeleteEntrenadorContratado.setString(1, NombreEquipo);
+			psDeleteEntrenadorContratado.executeUpdate();
 
 			// Verificar si ya existe un entrenador con el mismo DNI
 			if (countEntrenador == 0) {
@@ -1476,7 +1524,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 					String queryEquipoEntrenador = "INSERT INTO EntrenadorContratado (Temporada, Equipo, Entrenador, Nombre, Apellido, Nacionalidad) VALUES (?, ?, ?, ?, ?, ?)";
 					PreparedStatement psEquipoEntrenador = conn.prepareStatement(queryEquipoEntrenador);
 					// Asignar los valores a los parámetros
-					psEquipoEntrenador.setInt(1, 0); // Asumiendo que 'temporada' es un Integer con el número de temporada
+					psEquipoEntrenador.setInt(1, 0);
 					psEquipoEntrenador.setString(2, NombreEquipo);
 					psEquipoEntrenador.setString(3, DNIEntrenador);
 					psEquipoEntrenador.setString(4, NombreEntrenador);
@@ -1499,6 +1547,13 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 				}
 
 			}
+			
+			// Eliminar registros asociados en entrenadorcontratado
+			String deleteJugadorContratado = "DELETE FROM JugadorContratado WHERE Equipo = ? AND Temporada = ?";
+			PreparedStatement psDeleteJugadorContratado = conn.prepareStatement(deleteJugadorContratado);
+			psDeleteJugadorContratado.setString(1, NombreEquipo);
+			psDeleteJugadorContratado.setInt(2, 0);
+			psDeleteJugadorContratado.executeUpdate();
 
 			for (Jugador jugador : ListaJugadoresRegistrados) {
 
@@ -1562,7 +1617,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 					if (countJugadorContratado == 0) {
 
-						// Crear la consulta de inserción para la relación entre equipo y entrenador
+						// Crear la consulta de inserción para la relación entre equipo y jugador
 						String queryJugadorContratado = "INSERT INTO JugadorContratado (Temporada, Equipo, Jugador, Nombre, Apellido, Nacionalidad, Foto, Rol) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
 						PreparedStatement psJugadorContratado = conn.prepareStatement(queryJugadorContratado);
 						// Asignar los valores a los parámetros
@@ -1629,7 +1684,7 @@ public class EditarEquipo extends JFrame implements ActionListener, ListSelectio
 
 		EquipoSeleccion.setGuardado(true);
 
-		Logger.nuevoMovimiento(ListaMovimientos, "Ha editado el Equipo " + EquipoModificado.getNombre() + ".");
+		Logger.nuevoMovimiento("Ha editado el Equipo " + EquipoModificado.getNombre() + ".");
 
 		JOptionPane.showMessageDialog(this, "Se ha Editado el Equipo", "Equipo Editado", JOptionPane.INFORMATION_MESSAGE);
 

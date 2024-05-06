@@ -128,9 +128,6 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 	/** La Lista de Temporadas Totales que hay Registradas. */
 	private ArrayList<Temporada> ListaTemporadas;
 
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
-
 	/** La Lista de Usuarios Registrados. */
 	private List<Usuario> ListaUsuarios;
 
@@ -404,8 +401,6 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 		if (Seleccion.getTemporadaPosicion() != null) {
 			lstTemporada.setSelectedIndex(Seleccion.getTemporadaPosicion());
 		}
-		ListaMovimientos = Logger.cargarMovimientos();
-
 		EquipoSeleccion.setGuardado(false);
 
 		if (tlm.isEmpty()) {
@@ -553,12 +548,11 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 					eliminarCarpetaRecursivamente(carpetaJugadoresFile);
 				}
 
-				Logger.nuevoMovimiento(ListaMovimientos,
-						"Ha eliminado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
+				Logger.nuevoMovimiento("Ha eliminado la Temporada " + Seleccion.getTemporadaSeleccionada().getNumero() + ".");
 
 				try {
 					// Crear la conexión a la base de datos
-					Connection conn = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+					Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 					conn.setAutoCommit(false); // Desactivar el modo de autocommit
 
 					// Eliminar registros de temporadaparticipada para la temporada
@@ -761,7 +755,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 			JOptionPane.showMessageDialog(this, (String) "Se ha cerrado sesión. Volviendo a Login.",
 					"Cierre de sesión correcto", JOptionPane.INFORMATION_MESSAGE);
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 			// Creo las variables
 			Login L = new Login();
@@ -1034,7 +1028,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 
 		JOptionPane.showMessageDialog(this, "XML exportado correctamente", "Éxito", JOptionPane.INFORMATION_MESSAGE);
 
-		Logger.nuevoMovimiento(ListaMovimientos, "Ha exportado en formato XML los datos de la Temporadas.");
+		Logger.nuevoMovimiento("Ha exportado en formato XML los datos de la Temporadas.");
 	}
 
 	/**
@@ -1267,7 +1261,7 @@ public class Inicio extends JFrame implements ActionListener, WindowListener, Li
 	public void windowClosing(WindowEvent e) {
 		if (Sesion.getUsuarioActual() != null) {
 
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 		}
 	}

@@ -4,7 +4,6 @@ package aplicacion;
 import java.awt.EventQueue;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
@@ -91,9 +90,6 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 
 	/** La Lista de Equipos de la Temporada. */
 	private List<Equipo> ListaEquipos;
-
-	/** La Lista de Movimientos Totales que hay Registrados. */
-	private ArrayList<Logger> ListaMovimientos;
 
 	/**
 	 * Ejecuta la aplicacion.
@@ -281,8 +277,8 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 		if (Seleccion.getTemporadaSeleccionada() != null) {
 			lblTemporada.setText("Temporada " + Seleccion.getTemporadaNumero());
 
-			ListaEquipos = Seleccion.getTemporadaSeleccionada().getListaEquipos();
-
+			ListaEquipos = Equipo.cargarEquipos(Seleccion.getTemporadaNumero());
+			
 			for (Equipo equipo : ListaEquipos) {
 				if (!equipo.getNombre().equalsIgnoreCase("Equipo para Descansar")) {
 					elm.addElement(equipo);
@@ -306,8 +302,6 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 			btnEditarTemp.setVisible(false);
 			btnPanel.setBounds(864, 22, 140, 45);
 		}
-		
-		ListaMovimientos = Logger.cargarMovimientos();
 	}
 
 	/**
@@ -405,7 +399,7 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 			JOptionPane.showMessageDialog(this, (String) "Se ha cerrado sesión. Volviendo a Login.",
 					"Cierre de sesión correcto", JOptionPane.INFORMATION_MESSAGE);
 			
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 
 			// Creo las variables
 			Login L = new Login();
@@ -541,7 +535,7 @@ public class Equipos extends JFrame implements ActionListener, WindowListener {
 	public void windowClosing(WindowEvent e) {
 		if (Sesion.getUsuarioActual() != null) {
 			
-			Logger.nuevoMovimiento(ListaMovimientos, "Ha cerrado sesión.");
+			Logger.nuevoMovimiento("Ha cerrado sesión.");
 		}
 	}
 

@@ -78,6 +78,7 @@ public class Equipo implements Serializable {
 	 * @param n   el Nombre
 	 * @param esc el Escudo
 	 * @param d   la Descripcion
+	 * @param f   la Fecha de Creacion
 	 * @param e   el Entrenador
 	 * @param lj  la Lista de Jugadores
 	 * @param es  la Lista de Estadisticas por Temporada
@@ -92,41 +93,42 @@ public class Equipo implements Serializable {
 		this.ListaJugadores = lj;
 		this.estadisticasPorTemporada = es;
 	}
-
+	
 	/**
-	 * Instancia para crear un nuevo Equipo personalizado.
+	 * Instancia un objeto Equipo con atributos personalizados.
 	 *
-	 * @param n   el Nombre
-	 * @param esc el Escudo
-	 * @param d   la Descripcion
-	 * @param e   el Entrenador
-	 * @param lj  la Lista de Jugadores
+	 * @param n  el Nombre del equipo.
+	 * @param esc el Escudo del equipo.
+	 * @param d  la Descripción del equipo.
+	 * @param f  la Fecha de creación del equipo.
+	 * @param e  el Entrenador del equipo.
+	 * @param lj la Lista de Jugadores del equipo.
 	 */
 	// Constructor personalizado
 	public Equipo(String n, String esc, String d, Fecha f, Entrenador e, List<Jugador> lj) {
-		this.Nombre = n;
-		this.Escudo = esc;
-		this.Descripcion = d;
-		this.FechaCreacion = f;
-		this.Entrenador = e;
-		this.ListaJugadores = lj;
-		this.estadisticasPorTemporada = new ArrayList<Estadisticas>();
+	    this.Nombre = n;
+	    this.Escudo = esc;
+	    this.Descripcion = d;
+	    this.FechaCreacion = f;
+	    this.Entrenador = e;
+	    this.ListaJugadores = lj;
+	    this.estadisticasPorTemporada = new ArrayList<>();
 	}
 
 	/**
-	 * Instancia para crear un nuevo Equipo personalizado.
+	 * Instancia un objeto Equipo con un nombre específico.
 	 *
-	 * @param n el Nombre
+	 * @param n el Nombre del equipo.
 	 */
 	// Constructor personalizado
 	public Equipo(String n) {
-		this.Nombre = n;
-		this.Escudo = "";
-		this.Descripcion = "";
-		this.FechaCreacion = new Fecha();
-		this.Entrenador = new Entrenador();
-		this.ListaJugadores = new ArrayList<Jugador>();
-		this.estadisticasPorTemporada = new ArrayList<Estadisticas>();
+	    this.Nombre = n;
+	    this.Escudo = "";
+	    this.Descripcion = "";
+	    this.FechaCreacion = new Fecha();
+	    this.Entrenador = new Entrenador();
+	    this.ListaJugadores = new ArrayList<>();
+	    this.estadisticasPorTemporada = new ArrayList<>();
 	}
 
 	/**
@@ -304,7 +306,7 @@ public class Equipo implements Serializable {
 	 * @return el ArrayList de Equipos
 	 */
 	// Carga la lista de equipos desde un archivo
-	public static ArrayList<Equipo> cargarEquipos() {
+	public static ArrayList<Equipo> cargarEquipos(Integer temporada) {
 		ArrayList<Equipo> equipos = new ArrayList<>();
 
 		Connection conexion = null;
@@ -312,13 +314,13 @@ public class Equipo implements Serializable {
 		ResultSet rs = null;
 
 		try {
-			conexion = DriverManager.getConnection("jdbc:mysql://195.35.24.130/CSLeague", "gael", "123");
+			conexion = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "");
 			st = conexion.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 			rs = st.executeQuery("SELECT DISTINCT e.Nombre, e.FechaCreacion, tp.Escudo, tp.Descripcion, "
 					+ "ec.Entrenador, ec.Nombre AS NombreEntrenador, ec.Apellido, ec.Nacionalidad, en.FechaAlta "
 					+ "FROM Equipo e " + "JOIN EntrenadorContratado ec ON e.Nombre = ec.Equipo "
 					+ "JOIN Entrenador en ON ec.Entrenador = en.DNI "
-					+ "JOIN TemporadaParticipada tp ON e.Nombre = tp.Equipo " + "WHERE tp.Temporada = 0");
+					+ "JOIN TemporadaParticipada tp ON e.Nombre = tp.Equipo " + "WHERE tp.Temporada = "+ temporada +" AND ec.Temporada = "+ temporada);
 
 			while (rs.next()) {
 				String nombreEquipo = rs.getString("Nombre");
@@ -347,7 +349,7 @@ public class Equipo implements Serializable {
 				ResultSet rsJugadores = stJugadores.executeQuery(
 						"SELECT j.DNI, jc.Nombre, jc.Apellido, jc.Nacionalidad, jc.Foto, jc.Rol, j.FechaNacimiento "
 								+ "FROM JugadorContratado jc " + "JOIN Jugador j ON jc.Jugador = j.DNI " + "WHERE jc.Equipo = '"
-								+ nombreEquipo + "' AND jc.Temporada = 0");
+								+ nombreEquipo + "' AND jc.Temporada = "+temporada);
 
 				while (rsJugadores.next()) {
 					String dniJugador = rsJugadores.getString("DNI");
@@ -544,6 +546,12 @@ public class Equipo implements Serializable {
 		return estadisticas;
 	}
 
+	/**
+	 * Limpia las estadísticas de un equipo para una temporada específica en la base de datos.
+	 *
+	 * @param temporada    La temporada a la cual pertenecen las estadísticas a limpiar.
+	 * @param nombreEquipo  El nombre del equipo cuyas estadísticas se van a limpiar.
+	 */
 	public static void limpiarEstadisticasEquipo(Temporada temporada, String nombreEquipo) {
 		try (Connection conn = DriverManager.getConnection("jdbc:mysql://localhost/CSLeague", "root", "")) {
 			conn.setAutoCommit(false); // Desactivar el modo de autocommit
